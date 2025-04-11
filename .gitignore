@@ -1,6 +1,3 @@
-# Node.js
-node_modules/
-
 # TypeScript
 dist/
 build/
@@ -11,10 +8,21 @@ build/
 # Environment variables
 .env
 
-# IDE/editor-specific files
-.vscode/
-.idea/
-
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+node_modules
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
