@@ -1,0 +1,13 @@
+{
+  "name": "calorie-tracker",
+  "version": "1.0.0",
+  "description": "calorie tracker. school project",
+  "scripts": {
+    "start": "concurrently \"npm run start:react\" \"npm run start:express\"",
+    "start:react": "cd frontend && npm run dev",
+    "start:express": "cd backend && npm run dev"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
