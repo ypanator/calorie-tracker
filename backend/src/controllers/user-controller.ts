@@ -1,5 +1,5 @@
-import express from "express"
-let userRouter = express.Router()
+import express, { Router } from "express"
+let userRouter: Router = express.Router()
 
 
 

@@ -5,6 +5,8 @@ import userRouter from "./controllers/user-controller";
 
 let app = express();
 
+app.use(express.json())
+
 app.use("/exercise", exerciseRouter);
 app.use("/food", foodRouter);
 app.use("/user", userRouter);
