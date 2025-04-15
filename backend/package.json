@@ -16,12 +16,14 @@
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "express-session": "^1.18.1",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
+    "@types/express-session": "^1.18.1",
     "@types/node": "^22.14.0",
     "eslint": "^9.24.0",
     "nodemon": "^3.1.9",

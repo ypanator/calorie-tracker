@@ -24,7 +24,7 @@ exerciseRouter.get("/find", async (req, res, next) => {
         query = query.trim().replace(/[^a-zA-Z\s]/g, "");
 
         if (!query) {
-            throw new ApiError("Query must be a string and contain at least 1 letter.", 400)
+            throw new ApiError("Query must be a string and contain at least 1 letter.", 400);
         }
         res.status(200).json({ exercise: await exerciseService.find(query) });
 
