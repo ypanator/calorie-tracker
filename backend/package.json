@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
+    "express-session-sqlite": "^2.1.1",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "zod": "^3.24.2"
