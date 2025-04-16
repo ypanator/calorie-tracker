@@ -1,5 +1,5 @@
 import express, { Router } from "express"
-let userRouter: Router = express.Router()
+const userRouter: Router = express.Router()
 
 
 

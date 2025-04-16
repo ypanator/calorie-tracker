@@ -3,10 +3,13 @@ import session from "express-session";
 import sqliteStoreFactory from "express-session-sqlite";
 import { Database } from "sqlite3";
 
-import exerciseRouter from "./controllers/exercise-controller";
 import foodRouter from "./controllers/food-controller";
 import userRouter from "./controllers/user-controller";
 import errorHandler from "./error-handler/error-handler";
+
+import ExerciseProvider from "./providers/exercise-provider";
+import ExerciseService from "./services/exercise-service";
+import ExerciseController from "./controllers/exercise-controller";
 
 const app = express();
 const SqliteStore = sqliteStoreFactory(session);
@@ -33,7 +36,12 @@ app.use(session({
     }
 }));
 
-app.use("/exercise", exerciseRouter);
+// Dependency Injection
+const exerciseProvider: ExerciseProvider = new ExerciseProvider();
+const exerciseService: ExerciseService = new ExerciseService(exerciseProvider);
+const exerciseController: ExerciseController = new ExerciseController(exerciseService);
+app.use("/exercise", exerciseController.router);
+
 app.use("/food", foodRouter);
 app.use("/user", userRouter);
 

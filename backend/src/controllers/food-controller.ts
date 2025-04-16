@@ -1,5 +1,5 @@
 import express, { Router } from "express"
-let foodRouter: Router = express.Router()
+const foodRouter: Router = express.Router()
 
 
 
