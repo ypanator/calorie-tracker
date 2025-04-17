@@ -7,6 +7,8 @@ import foodRouter from "./controllers/food-controller";
 import userRouter from "./controllers/user-controller";
 import errorHandler from "./error-handler/error-handler";
 
+import { SequelizeAuth, SequelizeData } from "./db/db";
+
 import ExerciseProvider from "./providers/exercise-provider";
 import ExerciseService from "./services/exercise-service";
 import ExerciseController from "./controllers/exercise-controller";

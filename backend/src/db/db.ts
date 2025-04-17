@@ -1,8 +1,19 @@
 import { Sequelize } from "sequelize";
 
-const sequelize: Sequelize = new Sequelize({
-    dialect: "sqlite",
-    storage: "./data.sqlite"
-})
+export class SequelizeData extends Sequelize {
+    constructor() {
+        super({
+            dialect: "sqlite",
+            storage: "./data.sqlite"
+        });
+    }
+}
 
-export default sequelize;
+export class SequelizeAuth extends Sequelize {
+    constructor() {
+        super({
+            dialect: "sqlite",
+            storage: "./auth.sqlite"
+        });
+    }
+}
