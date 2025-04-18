@@ -10,12 +10,7 @@ export default class ExerciseService {
         this.exerciseProvider.add(exercise);
     }
 
-    // TODO: implement
     async find(query: string): Promise<Exercise> {
-        return {
-            name: "",
-            time: 1,
-            calories: 1
-        };
+        return await this.exerciseProvider.find(query);
     };
 };
