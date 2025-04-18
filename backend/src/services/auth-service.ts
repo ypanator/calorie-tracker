@@ -2,6 +2,7 @@ import bcrypt from "bcrypt"
 import AuthProvider from "../providers/auth-provider";
 import ApiError from "../error-handler/api-error";
 import { Sequelize } from "sequelize";
+import { AuthAttributes } from "../providers/auth-provider";
 
 export default class AuthService {
     
@@ -10,19 +11,19 @@ export default class AuthService {
     ) {}
     
     async login(username: string, password: string): Promise<number> {
-        const {password: storedPassword, id} = await this.authProvider.findCredentialsByUsername(username);
-        if (!storedPassword || !id) { 
+        const credentials: AuthAttributes | null = await this.authProvider.findCredentialsByUsername(username);
+        if (!credentials) { 
             throw new ApiError(`Could not find user with ${username} username.`, 404);
         }
+        const {hashedPassword: storedPassword, id} = credentials;
         
         if (!(await bcrypt.compare(password, storedPassword))) {
             throw new ApiError("Incorrect password.", 401);
         }
         
-        return id;
+        return id!;
     };  
 
-    // TODO: check if user already in db
     async register(username: string, password: string) {
         const transaction = await this.sequelize.transaction(); 
 
@@ -35,7 +36,7 @@ export default class AuthService {
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const user = await this.userService.create({ username }, { transaction });
-            await this.authProvider.create({ userId: user.id, hashedPassword }, { transaction });
+            await this.authProvider.create({ username, hashedPassword, userId: user.id }, transaction );
     
             await transaction.commit();
 

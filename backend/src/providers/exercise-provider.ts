@@ -1,13 +1,13 @@
-import { ModelStatic, DataTypes } from "sequelize";
-import sequelize from "../db/db";
+import { ModelStatic, DataTypes, Model, } from "sequelize";
+import { SequelizeData } from "../db/db";
 import { Exercise } from "../schemas/exercise-schema";
 
-class ExerciseProvider {
+export default class ExerciseProvider {
     
-    exerciseModel: ModelStatic<any>;
+    exerciseModel: ModelStatic<ExerciseModel>;
 
-    constructor() {
-        this.exerciseModel = sequelize.define("Exercise", {
+    constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
+        this.exerciseModel = sequelizeData.define("Exercise", {
             name: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
@@ -31,16 +31,26 @@ class ExerciseProvider {
             }
         });
 
-        // TODO: implement User
-        this.exerciseModel.belongsTo(User);
+        // maybe foreign key definition is redundant?
+        this.exerciseModel.belongsTo(userProvider.userModel, {
+            foreignKey: {
+                name: "userId",
+                allowNull: false,
+            }
+        });
+        this.exerciseModel.sync();
     };
 
-    async create(exercise: Exercise, userId: Number) {
-        return await this.exerciseModel.create({
-            ...exercise,
-            UserId: userId
-        });
+    async create(exercise: Exercise, userId: number): Promise<ExerciseModel> {
+        return this.exerciseModel.create({ ...exercise, userId: userId });
     };
 };
 
-export default ExerciseProvider;
+export interface ExerciseAttributes {
+    name: string,
+    time: number,
+    calories: number,
+    userId: number
+}
+
+export type ExerciseModel = Model<ExerciseAttributes>
