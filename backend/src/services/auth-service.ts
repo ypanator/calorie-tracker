@@ -15,21 +15,21 @@ export default class AuthService {
         if (!credentials) { 
             throw new ApiError(`Could not find user with ${username} username.`, 404);
         }
-        const {hashedPassword: storedPassword, id} = credentials;
+        const {hashedPassword: storedPassword, userId} = credentials;
         
         if (!(await bcrypt.compare(password, storedPassword))) {
             throw new ApiError("Incorrect password.", 401);
         }
         
-        return id!;
+        return userId!;
     };  
 
-    async register(username: string, password: string) {
+    async register(username: string, password: string): Promise<void> {
         const transaction = await this.sequelize.transaction(); 
 
         try {
             const credentials = await this.authProvider.findCredentialsByUsername(username);
-            if (credentials !== null) {
+            if (credentials) {
                 throw new ApiError("Username already taken.", 400);
             }
 

@@ -11,9 +11,9 @@ export default class AuthController {
         this.router.post("/login", async (req, res, next) => {
             try {
                 const { username, password } = AuthSchema.parse(req.body);
-                const user_id: number = await authService.login(username, password);
+                const userId: number = await authService.login(username, password);
 
-                req.session.user_id = user_id;
+                req.session.userId = userId;
                 res.status(200).json("Successfuly logged in.");
             } catch (e) { next(e); }
         });

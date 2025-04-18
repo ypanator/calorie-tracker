@@ -1,6 +1,5 @@
 import { ModelStatic, DataTypes, Model, } from "sequelize";
 import { SequelizeData } from "../db/db";
-import { Exercise } from "../schemas/exercise-schema";
 
 export default class ExerciseProvider {
     
@@ -41,12 +40,13 @@ export default class ExerciseProvider {
         this.exerciseModel.sync();
     };
 
-    async create(exercise: Exercise, userId: number): Promise<ExerciseModel> {
-        return this.exerciseModel.create({ ...exercise, userId: userId });
+    async add(exercise: ExerciseAttributes): Promise<ExerciseModel> {
+        return this.exerciseModel.create(exercise);
     };
 };
 
 export interface ExerciseAttributes {
+    id?: number,
     name: string,
     time: number,
     calories: number,

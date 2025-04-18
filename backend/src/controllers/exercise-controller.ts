@@ -1,8 +1,7 @@
 import express, { Router } from "express"
-import { z } from "zod";
 
-import { ExerciseSchema } from "../schemas/exercise-schema";
 import ExerciseService from "../services/exercise-service";
+import { exerciseSchema } from "../schemas/exercise-schema";
 import ApiError from "../error-handler/api-error";
 
 export default class ExerciseController {
@@ -25,5 +24,15 @@ export default class ExerciseController {
                 next(e);
             }
         });
+
+        this.router.post("/add", async (req, res, next) => {
+            try {
+                await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.session.userId! });
+                res.status(201).json("Exercise added.");
+        
+            } catch (e) {
+                next(e)
+            }
+        })
     };
 };
