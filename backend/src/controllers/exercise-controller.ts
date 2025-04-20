@@ -3,6 +3,7 @@ import express, { Router } from "express"
 import ExerciseService from "../services/exercise-service";
 import { exerciseSchema } from "../schemas/exercise-schema";
 import ApiError from "../error-handler/api-error";
+import { ExerciseApi } from "../schemas/exercise-api-schema";
 
 export default class ExerciseController {
     router: Router;
@@ -18,7 +19,25 @@ export default class ExerciseController {
                 if (!query) {
                     throw new ApiError("Query must be a string and contain at least 1 letter.", 400);
                 }
-                res.status(200).json({ exercise: await exerciseService.find(query) });
+
+                const durationStr = req.query.duration;
+                if (durationStr === undefined) {
+                    throw new ApiError("Please provide duration of the exercise.", 400);
+                }
+                if (typeof durationStr !== "string") { 
+                    throw new ApiError("Please provide duration as a string.", 400);
+                }
+
+                const durationInt: number = parseInt(durationStr);
+                if (Number.isNaN(durationInt)) {
+                    throw new ApiError("Please provide valid duration value.", 400);
+                }
+                if (durationInt <= 0) {
+                    throw new ApiError("Duration must be greater than 0.", 400);
+                }
+
+                const exercises: ExerciseApi = await exerciseService.find(req.session.userId!, query, durationInt);
+                res.status(200).json({ exercises: exercises });
         
             } catch (e) {
                 next(e);

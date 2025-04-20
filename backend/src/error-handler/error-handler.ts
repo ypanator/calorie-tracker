@@ -6,6 +6,7 @@ const errorHandler: ErrorRequestHandler = (err: ApiError | z.ZodError | Error, r
     if (err instanceof z.ZodError) {
         res.status(400).json({ error: err.errors });
     } else if (err instanceof Error) {
+        console.log(err);
         res.status(500).json({ error: "Internal server error." });
     } else {
         res.status(err.code).json({ error: err.msg });

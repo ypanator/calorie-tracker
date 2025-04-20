@@ -2,6 +2,8 @@ import { ModelStatic, DataTypes, Model, } from "sequelize";
 import { SequelizeData } from "../db/db";
 import axios from "axios";
 import ApiError from "../error-handler/api-error";
+import { exerciseApiSchema, ExerciseApi } from "../schemas/exercise-api-schema";
+import { z } from "zod";
 
 export default class ExerciseProvider {
     
@@ -46,7 +48,7 @@ export default class ExerciseProvider {
         return this.exerciseModel.create(exercise);
     };
 
-    async find(activity: string, weight: number, duration: number) {
+    async find(activity: string, weight: number, duration: number): Promise<ExerciseApi> {
         const apiKey = process.env.exercise_api_key || "";
         if (!apiKey) {
             console.log("Missing exercises api key.");
@@ -73,7 +75,17 @@ export default class ExerciseProvider {
             throw new ApiError("Searching for exercises is not available.", 500);
         }
 
-        return response.data;
+        const responseData = response.data;
+        try {
+            exerciseApiSchema.parse(responseData);
+        } catch (e) {
+            if (e instanceof z.ZodError) {
+                console.log(`Exercises api parsing error. - ${e}`);
+                throw new ApiError("Searching for exercises is not available.", 500);
+            }
+        }
+
+        return responseData;
     }
 };
 
