@@ -17,8 +17,10 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
     "express-session-sqlite": "^2.1.1",
+    "helmet": "^8.1.0",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "zod": "^3.24.2"

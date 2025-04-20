@@ -1,6 +1,7 @@
 import express, { Router } from "express"
 import { AuthSchema } from "../schemas/auth-schema";
 import AuthService from "../services/auth-service";
+import { authLimiter, requireAuth } from "../middleware/auth-middleware";
 
 export default class AuthController {
     router: Router;
@@ -8,7 +9,7 @@ export default class AuthController {
     constructor(authService: AuthService) {
         this.router = express.Router();
 
-        this.router.post("/login", async (req, res, next) => {
+        this.router.post("/login", authLimiter, async (req, res, next) => {
             try {
                 const { username, password } = AuthSchema.parse(req.body);
                 const userId: number = await authService.login(username, password);
@@ -18,7 +19,7 @@ export default class AuthController {
             } catch (e) { next(e); }
         });
 
-        this.router.post("/logout", (req, res, next) => {
+        this.router.post("/logout", requireAuth, (req, res, next) => {
             try {
                 req.session.destroy(() => {});
                 res.clearCookie("connect.sid");
@@ -26,7 +27,7 @@ export default class AuthController {
             } catch (e) { next(e); }
         });
 
-        this.router.post("/register", async (req, res, next) => {
+        this.router.post("/register", authLimiter, async (req, res, next) => {
             try {
                 const { username, password } = AuthSchema.parse(req.body);
                 await authService.register(username, password);

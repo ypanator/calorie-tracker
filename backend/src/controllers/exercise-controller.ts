@@ -4,6 +4,7 @@ import ExerciseService from "../services/exercise-service";
 import { exerciseSchema } from "../schemas/exercise-schema";
 import ApiError from "../error-handler/api-error";
 import { ExerciseApi } from "../schemas/exercise-api-schema";
+import { requireAuth } from "../middleware/auth-middleware";
 
 export default class ExerciseController {
     router: Router;
@@ -11,7 +12,7 @@ export default class ExerciseController {
     constructor(exerciseService: ExerciseService) {
         this.router = express.Router();
         
-        this.router.get("/find", async (req, res, next) => {
+        this.router.get("/find", requireAuth, async (req, res, next) => {
             try {
                 let query: string = typeof req.query.name === "string" ? req.query.name : "";
                 query = query.trim().replace(/[^a-zA-Z\s]/g, "");
@@ -44,7 +45,7 @@ export default class ExerciseController {
             }
         });
 
-        this.router.post("/add", async (req, res, next) => {
+        this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
                 await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.session.userId! });
                 res.status(201).json("Exercise added.");

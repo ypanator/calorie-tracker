@@ -13,6 +13,7 @@ import dotenv from "dotenv"
 import ExerciseProvider from "./providers/exercise-provider";
 import ExerciseService from "./services/exercise-service";
 import ExerciseController from "./controllers/exercise-controller";
+import helmet from "helmet";
 
 const app = express();
 const SqliteStore = sqliteStoreFactory(session);
@@ -48,6 +49,8 @@ app.use("/exercise", exerciseController.router);
 
 app.use("/food", foodRouter);
 app.use("/user", userRouter);
+
+app.use(helmet());
 
 // testing endpoint
 app.get("/", (req, res) => { res.send("Hello World!") });
