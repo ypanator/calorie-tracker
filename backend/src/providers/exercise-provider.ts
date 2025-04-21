@@ -2,7 +2,8 @@ import { ModelStatic, DataTypes, Model, } from "sequelize";
 import { SequelizeData } from "../db/db";
 import axios from "axios";
 import ApiError from "../error-handler/api-error";
-import { exerciseApiSchema, ExerciseApi } from "../schemas/exercise-api-schema";
+import exerciseApiSchema from "../schemas/exercise-api-schema";
+import { ExerciseApi } from "../types/exercise-type";
 import { z } from "zod";
 import UserProvider from "./user-provider";
 

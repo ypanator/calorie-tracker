@@ -1,5 +1,5 @@
 import express, { Router } from "express"
-import { AuthSchema } from "../schemas/auth-schema";
+import authSchema from "../schemas/auth-schema";
 import AuthService from "../services/auth-service";
 import { authLimiter, requireAuth } from "../middleware/auth-middleware";
 
@@ -11,7 +11,7 @@ export default class AuthController {
 
         this.router.post("/login", authLimiter, async (req, res, next) => {
             try {
-                const { username, password } = AuthSchema.parse(req.body);
+                const { username, password } = authSchema.parse(req.body);
                 const userId: number = await authService.login(username, password);
 
                 req.session.userId = userId;
@@ -30,7 +30,7 @@ export default class AuthController {
 
         this.router.post("/register", authLimiter, async (req, res, next) => {
             try {
-                const { username, password } = AuthSchema.parse(req.body);
+                const { username, password } = authSchema.parse(req.body);
                 await authService.register(username, password);
                 res.status(200).json("Successfuly registered.");
 

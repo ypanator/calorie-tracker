@@ -1,7 +1,7 @@
 import express, { Router } from "express"
 import { requireAuth } from "../middleware/auth-middleware";
 import UserService from "../services/user-service";
-import { userParamsSchema } from "../schemas/user-params-schema";
+import userSchema from "../schemas/user-schema";
 
 export default class UserController {
     router: Router;
@@ -18,9 +18,9 @@ export default class UserController {
 
         this.router.post("/set-params", requireAuth, async (req, res, next) => {
             try {
-                const newParams = userParamsSchema.parse(req.body);
+                const newParams = userSchema.parse(req.body);
                 userService.setParams(newParams);
-                
+
                 const data = userService.getData(req.session.userId!);
                res.status(200).json({ data: data }); 
             } catch (e) { next(e); }

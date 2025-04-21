@@ -1,6 +1,6 @@
 import ExerciseProvider from "../providers/exercise-provider";
 import { ExerciseAttributes } from "../providers/exercise-provider";
-import { ExerciseApi } from "../schemas/exercise-api-schema";
+import { ExerciseApi } from "../types/exercise-type";
 import UserService from "./user-service";
 
 export default class ExerciseService {

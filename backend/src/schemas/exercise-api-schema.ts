@@ -7,6 +7,5 @@ const exerciseApiItemSchema = z.object({
   total_calories: z.number().int()
 });
 
-export const exerciseApiSchema = z.array(exerciseApiItemSchema).max(10);
-
-export type ExerciseApi = z.infer<typeof exerciseApiSchema>;
+const exerciseApiSchema = z.array(exerciseApiItemSchema).max(10);
+export default exerciseApiSchema;

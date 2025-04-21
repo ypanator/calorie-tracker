@@ -1,9 +1,9 @@
 import express, { Router } from "express"
 
 import ExerciseService from "../services/exercise-service";
-import { exerciseSchema } from "../schemas/exercise-schema";
+import exerciseSchema from "../schemas/exercise-schema";
 import ApiError from "../error-handler/api-error";
-import { ExerciseApi } from "../schemas/exercise-api-schema";
+import { ExerciseApi } from "../types/exercise-type";
 import { requireAuth } from "../middleware/auth-middleware";
 
 export default class ExerciseController {
