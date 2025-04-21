@@ -31,7 +31,7 @@ export default class ExerciseController {
 
                 const durationInt: number = parseInt(durationStr);
                 if (Number.isNaN(durationInt)) {
-                    throw new ApiError("Please provide valid duration value.", 400);
+                    throw new ApiError("Please provide a valid duration value.", 400);
                 }
                 if (durationInt <= 0) {
                     throw new ApiError("Duration must be greater than 0.", 400);
@@ -40,9 +40,7 @@ export default class ExerciseController {
                 const exercises: ExerciseApi = await exerciseService.find(req.session.userId!, query, durationInt);
                 res.status(200).json({ exercises: exercises });
         
-            } catch (e) {
-                next(e);
-            }
+            } catch (e) { next(e); }
         });
 
         this.router.post("/add", requireAuth, async (req, res, next) => {
@@ -50,9 +48,7 @@ export default class ExerciseController {
                 await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.session.userId! });
                 res.status(201).json("Exercise added.");
         
-            } catch (e) {
-                next(e)
-            }
+            } catch (e) { next(e); }
         })
     };
 };

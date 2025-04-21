@@ -4,6 +4,7 @@ import axios from "axios";
 import ApiError from "../error-handler/api-error";
 import { exerciseApiSchema, ExerciseApi } from "../schemas/exercise-api-schema";
 import { z } from "zod";
+import UserProvider from "./user-provider";
 
 export default class ExerciseProvider {
     
@@ -75,9 +76,9 @@ export default class ExerciseProvider {
             throw new ApiError("Searching for exercises is not available.", 500);
         }
 
-        const responseData = response.data;
+        let responseData = response.data;
         try {
-            exerciseApiSchema.parse(responseData);
+            responseData = exerciseApiSchema.parse(responseData);
         } catch (e) {
             if (e instanceof z.ZodError) {
                 console.log(`Exercises api parsing error. - ${e}`);

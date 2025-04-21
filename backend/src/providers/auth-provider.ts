@@ -1,6 +1,6 @@
 import { DataTypes, Model, ModelStatic, Transaction } from "sequelize";
 import { SequelizeAuth } from "../db/db";
-import { Auth } from "../schemas/auth-schema";
+import UserProvider from "./user-provider";
 
 export default class AuthProvider {
 

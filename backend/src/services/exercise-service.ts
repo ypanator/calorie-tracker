@@ -1,7 +1,7 @@
 import ExerciseProvider from "../providers/exercise-provider";
 import { ExerciseAttributes } from "../providers/exercise-provider";
 import { ExerciseApi } from "../schemas/exercise-api-schema";
-import { Exercise } from "../schemas/exercise-schema";
+import UserService from "./user-service";
 
 export default class ExerciseService {
     
@@ -12,7 +12,7 @@ export default class ExerciseService {
     }
 
     async find(userId: number, query: string, duration: number): Promise<ExerciseApi> {
-        const user = this.userService.findByUserId(userId);
-        return await this.exerciseProvider.find(query, user.get("weight"), duration);
+        const user = this.userService.getData(userId);
+        return await this.exerciseProvider.find(query, user.weight, duration);
     };
 };

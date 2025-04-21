@@ -24,6 +24,7 @@ export default class AuthController {
                 req.session.destroy(() => {});
                 res.clearCookie("connect.sid");
                 res.status(200).send("Logged out successfully.");
+
             } catch (e) { next(e); }
         });
 
@@ -32,6 +33,7 @@ export default class AuthController {
                 const { username, password } = AuthSchema.parse(req.body);
                 await authService.register(username, password);
                 res.status(200).json("Successfuly registered.");
+
             } catch (e) { next(e); }
         })
     };

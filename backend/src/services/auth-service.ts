@@ -3,6 +3,7 @@ import AuthProvider from "../providers/auth-provider";
 import ApiError from "../error-handler/api-error";
 import { Sequelize } from "sequelize";
 import { AuthAttributes } from "../providers/auth-provider";
+import UserService from "./user-service";
 
 export default class AuthService {
     
