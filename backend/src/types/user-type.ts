@@ -6,6 +6,6 @@ import { Food } from "./food-type";
 
 export type User = z.infer<typeof userSchema> & { id?: number };
 
-export type UserModel = Model<User> & User;
+export type UserModel = Model<User>;
 
 export type UserFull = User & { exercises: Exercise[], foods: Food[] };

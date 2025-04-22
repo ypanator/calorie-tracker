@@ -1,13 +1,12 @@
 import ExerciseProvider from "../providers/exercise-provider";
-import { ExerciseAttributes } from "../providers/exercise-provider";
-import { ExerciseApi } from "../types/exercise-type";
+import { Exercise, ExerciseApi } from "../types/exercise-type";
 import UserService from "./user-service";
 
 export default class ExerciseService {
     
     constructor(private exerciseProvider: ExerciseProvider, private userService: UserService) {}
     
-    async add(exercise: ExerciseAttributes) {
+    async add(exercise: Exercise) {
         this.exerciseProvider.add(exercise);
     }
 

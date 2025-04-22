@@ -3,16 +3,16 @@ import { SequelizeData } from "../db/db";
 import axios from "axios";
 import ApiError from "../error-handler/api-error";
 import exerciseApiSchema from "../schemas/exercise-api-schema";
-import { ExerciseApi } from "../types/exercise-type";
+import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type";
 import { z } from "zod";
 import UserProvider from "./user-provider";
 
 export default class ExerciseProvider {
     
-    exerciseModel: ModelStatic<ExerciseModel>;
+    exerciseModelStatic: ModelStatic<ExerciseModel>;
     
     constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
-        this.exerciseModel = sequelizeData.define("Exercise", {
+        this.exerciseModelStatic = sequelizeData.define("Exercise", {
             name: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
@@ -37,17 +37,17 @@ export default class ExerciseProvider {
         });
         
         // maybe foreign key definition is redundant?
-        this.exerciseModel.belongsTo(userProvider.userModel, {
+        this.exerciseModelStatic.belongsTo(userProvider.userModelStatic, {
             foreignKey: {
                 name: "userId",
                 allowNull: false,
             }
         });
-        this.exerciseModel.sync();
+        this.exerciseModelStatic.sync();
     };
     
-    async add(exercise: ExerciseAttributes): Promise<ExerciseModel> {
-        return this.exerciseModel.create(exercise);
+    async add(exercise: Exercise): Promise<ExerciseModel> {
+        return this.exerciseModelStatic.create(exercise);
     };
 
     async find(activity: string, weight: number, duration: number): Promise<ExerciseApi> {
@@ -90,13 +90,3 @@ export default class ExerciseProvider {
         return responseData;
     }
 };
-
-export interface ExerciseAttributes {
-    id?: number,
-    name: string,
-    time: number,
-    calories: number,
-    userId: number
-}
-
-export type ExerciseModel = Model<ExerciseAttributes>

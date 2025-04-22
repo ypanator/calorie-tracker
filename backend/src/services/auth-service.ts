@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import AuthProvider from "../providers/auth-provider";
 import ApiError from "../error-handler/api-error";
 import { Sequelize } from "sequelize";
-import { AuthAttributes } from "../providers/auth-provider";
+import { Auth, AuthModel } from "../types/auth-type";
 import UserService from "./user-service";
 
 export default class AuthService {
@@ -12,11 +12,11 @@ export default class AuthService {
     ) {}
     
     async login(username: string, password: string): Promise<number> {
-        const credentials: AuthAttributes | null = await this.authProvider.findCredentialsByUsername(username);
+        const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
         if (!credentials) { 
             throw new ApiError(`Could not find user with ${username} username.`, 404);
         }
-        const {hashedPassword: storedPassword, userId} = credentials;
+        const {password: storedPassword, userId} = credentials.get({ plain: true });
         
         if (!(await bcrypt.compare(password, storedPassword))) {
             throw new ApiError("Incorrect password.", 401);
@@ -29,15 +29,15 @@ export default class AuthService {
         const transaction = await this.sequelize.transaction(); 
 
         try {
-            const credentials = await this.authProvider.findCredentialsByUsername(username);
+            const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
             if (credentials) {
                 throw new ApiError("Username already taken.", 400);
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const user = await this.userService.create({ username }, { transaction });
-            await this.authProvider.create({ username, hashedPassword, userId: user.id }, transaction );
+            const user = await this.userService.create(username, transaction);
+            await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transaction );
     
             await transaction.commit();
 

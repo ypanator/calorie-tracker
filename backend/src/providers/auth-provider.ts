@@ -1,13 +1,14 @@
 import { DataTypes, Model, ModelStatic, Transaction } from "sequelize";
 import { SequelizeAuth } from "../db/db";
 import UserProvider from "./user-provider";
+import { Auth, AuthModel } from "../types/auth-type";
 
 export default class AuthProvider {
 
-    authModel: ModelStatic<AuthModel>;
+    authModelStatic: ModelStatic<AuthModel>;
 
     constructor(private sequelizeAuth: SequelizeAuth, private userProvider: UserProvider) {
-        this.authModel = sequelizeAuth.define("Auth", {
+        this.authModelStatic = sequelizeAuth.define("Auth", {
             username: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
@@ -15,7 +16,7 @@ export default class AuthProvider {
                     len: [1, 100]
                 }
             },
-            hashedPassword: {
+            password: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 validate: {
@@ -25,24 +26,15 @@ export default class AuthProvider {
             }
         });
 
-        this.authModel.belongsTo(userProvider.userModel);
+        this.authModelStatic.belongsTo(userProvider.userModelStatic);
         this.sequelizeAuth.sync();
     }
 
-    create(auth: AuthAttributes, transaction: Transaction): Promise<AuthModel> {
-        return this.authModel.create(auth, { transaction: transaction });
+    async create(auth: Auth, transaction: Transaction): Promise<AuthModel> {
+        return this.authModelStatic.create(auth, { transaction: transaction });
     }
 
-    findCredentialsByUsername(username: string): Promise<AuthModel | null> {
-        return this.authModel.findOne({ where: { username } });
+    async findCredentialsByUsername(username: string): Promise<AuthModel | null> {
+        return this.authModelStatic.findOne({ where: { username }});
     }
 }
-
-export interface AuthAttributes {
-    id?: number,
-    username: string,
-    hashedPassword: string,
-    userId: number
-};
-
-export type AuthModel = Model<AuthAttributes> & AuthAttributes;

@@ -1,18 +1,19 @@
 import { Transaction } from "sequelize";
 import UserProvider from "../providers/user-provider";
+import { User } from "../types/user-type";
 
 export default class UserService {
     
     constructor(private userProvider: UserProvider) {}
 
-    setParams(newParams: { gender: "male" | "female"; age: number; height: number; weight: number; }) {
+    setParams(newParams: User): User {
         throw new Error("Method not implemented.");
     }
-    getData(arg0: number) {
+    getData(userId: number): User {
         throw new Error("Method not implemented.");
     }
 
-    create(arg0: { username: string; }, arg1: { transaction: Transaction; }) {
+    create(username: string, transaction: Transaction): User {
         throw new Error("Method not implemented.");
     }
 }

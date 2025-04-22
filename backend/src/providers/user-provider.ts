@@ -1,8 +1,9 @@
 import { Model, ModelStatic } from "sequelize";
+import { User } from "../types/user-type";
 
 export default class UserProvider {
 
-    userModel: ModelStatic<Model<any, any>>;
+    userModelStatic: ModelStatic<Model<User>>;
 
 }
 
