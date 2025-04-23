@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import AuthProvider from "../providers/auth-provider";
-import ApiError from "../error-handler/api-error";
+import ApiError from "../error/api-error";
 import { Sequelize } from "sequelize";
 import { Auth, AuthModel } from "../types/auth-type";
 import UserService from "./user-service";
@@ -36,7 +36,7 @@ export default class AuthService {
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const user = await this.userService.create(username, transaction);
+            const user = await this.userService.createUser(username, transaction);
             await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transaction );
     
             await transaction.commit();

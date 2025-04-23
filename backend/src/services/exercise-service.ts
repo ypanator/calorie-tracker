@@ -11,7 +11,7 @@ export default class ExerciseService {
     }
 
     async find(userId: number, query: string, duration: number): Promise<ExerciseApi> {
-        const user = this.userService.getData(userId);
+        const user = (await this.userService.getUserAttributes(userId)).get({ plain: true });
         return await this.exerciseProvider.find(query, user.weight, duration);
     };
 };
