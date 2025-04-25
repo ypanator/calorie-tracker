@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import ApiError from "../error-handler/api-error";
+import ApiError from "../error/api-error";
 import rateLimit from 'express-rate-limit';
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {

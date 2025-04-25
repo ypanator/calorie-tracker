@@ -36,7 +36,7 @@ export default class AuthService {
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const user = await this.userService.createUser(username, transaction);
+            const user = (await this.userService.createUser(transaction)).get({ plain: true });
             await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transaction );
     
             await transaction.commit();

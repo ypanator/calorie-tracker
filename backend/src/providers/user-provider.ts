@@ -1,18 +1,24 @@
 import { Model, ModelStatic } from "sequelize";
-import { UserAttributes } from "../types/user-type";
+import { User, UserAttributes, UserAttributesModel, UserModel, UserProfileModel } from "../types/user-type";
 
 export default class UserProvider {
 
-    userModelStatic: ModelStatic<Model<UserAttributes>>;
+    createUser(defaultUser: User): Promise<UserAttributesModel> {
+        throw new Error("Method not implemented.");
+    }
+
+    getUserProfileByUserId(userId: number): Promise<UserProfileModel> {
+        throw new Error("Method not implemented.");
+    }
+
+    getUserAttributesByUserId(userId: number): Promise<UserAttributesModel> {
+        throw new Error("Method not implemented.");
+    }
+
+    getUserByUserId(userId: number): Promise<UserModel> {
+        throw new Error("Method not implemented.");
+    }
+
+    userModelStatic: ModelStatic<UserAttributesModel>;
 
 }
-
-export interface UserAttributes {
-    id?: number,
-    gender: "male" | "female"
-    age: number,
-    height: number,
-    weight: number
-}
-
-export type UserModel = Model<UserAttributes>;

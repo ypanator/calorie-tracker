@@ -11,18 +11,18 @@ export default class UserController {
 
         this.router.get("/profile", requireAuth, async (req, res, next) => {
             try {
-                const data = userService.getData(req.session.userId!);
-               res.status(200).json({ data: data }); 
+                const user = (await userService.getUserProfile(req.session.userId!)).get({ plain: true });
+                res.status(200).json({ user: user }); 
             } catch (e) { next(e); }
         });
 
-        this.router.post("/set-params", requireAuth, async (req, res, next) => {
+        this.router.post("/set-attr", requireAuth, async (req, res, next) => {
             try {
-                const newParams = userSchema.parse(req.body);
-                userService.setParams(newParams);
+                const attributes = userSchema.parse(req.body);
+                const userId: number = req.session.userId!
+                const user = (await userService.updateUserAttributes(userId, attributes)).get({ plain: true });;
 
-                const data = userService.getData(req.session.userId!);
-               res.status(200).json({ data: data }); 
+               res.status(200).json({ user: user }); 
             } catch (e) { next(e); }
         });
     };

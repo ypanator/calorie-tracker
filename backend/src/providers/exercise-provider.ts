@@ -1,7 +1,7 @@
 import { ModelStatic, DataTypes, Model, } from "sequelize";
 import { SequelizeData } from "../db/db";
 import axios from "axios";
-import ApiError from "../error-handler/api-error";
+import ApiError from "../error/api-error";
 import exerciseApiSchema from "../schemas/exercise-api-schema";
 import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type";
 import { z } from "zod";
