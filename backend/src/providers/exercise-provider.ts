@@ -16,23 +16,17 @@ export default class ExerciseProvider {
             name: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
-                validate: {
-                    len: [1, 100]
-                }
+                validate: { len: [1, 100] }
             },
             time: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                validate: {
-                    min: 1
-                }
+                validate: { min: 1 }
             },
             calories: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                validate: {
-                    min: 1
-                }                
+                validate: { min: 1 }                
             }
         });
         

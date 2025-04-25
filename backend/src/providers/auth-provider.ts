@@ -12,17 +12,12 @@ export default class AuthProvider {
             username: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
-                validate: {
-                    len: [1, 100]
-                }
+                validate: { len: [1, 100] }
             },
             password: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                validate: {
-                    // maybe shorter?
-                    len: [1, 255]
-                }
+                validate: { len: [1, 255] } // maybe shorter?
             }
         });
 

@@ -6,23 +6,24 @@ export default class UserService {
     
     constructor(private userProvider: UserProvider) {}
 
-    async updateUserAttributes(userId: number, attributes: UserAttributes): Promise<UserApiModel> {
-        throw new Error("Method not implemented.");
+    async updateUserAttributes(userId: number, attributes: UserAttributes): Promise<UserApiModel | null> {
+        this.userProvider.updateAttributes(userId, attributes);
+        return this.userProvider.getUserApiByUserId(userId);
     }
 
-    async getUserAttributes(userId: number): Promise<UserAttributesModel> {
+    async getUserAttributes(userId: number): Promise<UserAttributesModel | null> {
         return this.userProvider.getUserAttributesByUserId(userId);
     }
 
-    async getUser(userId: number): Promise<UserModel> {
+    async getUser(userId: number): Promise<UserModel | null> {
         return this.userProvider.getUserByUserId(userId);
     }
 
-    async getUserProfile(userId: number): Promise<UserProfileModel> {
+    async getUserProfile(userId: number): Promise<UserProfileModel | null> {
         return this.userProvider.getUserProfileByUserId(userId);
     }
 
-    async createUser(transaction: Transaction): Promise<UserAttributesModel> {
+    async createUser(transaction: Transaction): Promise<UserModel> {
         const defaultUser: User = {
             gender: "male",
             age: 30,
