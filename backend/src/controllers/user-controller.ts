@@ -26,11 +26,7 @@ export default class UserController {
             try {
                 const attributes = userSchema.parse(req.body);
                 const userId: number = req.session.userId!
-                const user = (await userService.updateUserAttributes(userId, attributes))?.get({ plain: true }) ?? null;
-                if (!user) {
-                    console.log(`User does not exist in a database but the session is set ${userId} ${attributes}`);
-                    throw new ApiError("User does not exist.", 500);
-                }
+                const user = await userService.updateUserAttributes(userId, attributes);
 
                res.status(200).json({ user: user }); 
             } catch (e) { next(e); }

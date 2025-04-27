@@ -1,48 +1,50 @@
 import bcrypt from "bcrypt"
 import AuthProvider from "../providers/auth-provider";
 import ApiError from "../error/api-error";
-import { Sequelize } from "sequelize";
+import { SequelizeAuth, SequelizeData } from "../db/db";
 import { Auth, AuthModel } from "../types/auth-type";
 import UserService from "./user-service";
 
 export default class AuthService {
     
     constructor(
-        private authProvider: AuthProvider, private sequelize: Sequelize, private userService: UserService
+        private authProvider: AuthProvider, private sequelizeAuth: SequelizeAuth, private userService: UserService, private sequelizeData: SequelizeData
     ) {}
     
     async login(username: string, password: string): Promise<number> {
         const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
         if (!credentials) { 
-            throw new ApiError(`Could not find user with ${username} username.`, 404);
+            throw new ApiError("Incorrect credentials.", 401);
         }
         const {password: storedPassword, userId} = credentials.get({ plain: true });
         
         if (!(await bcrypt.compare(password, storedPassword))) {
-            throw new ApiError("Incorrect password.", 401);
+            throw new ApiError("Incorrect credentials.", 401);
         }
         
         return userId!;
     };  
 
     async register(username: string, password: string): Promise<void> {
-        const transaction = await this.sequelize.transaction(); 
+        const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
+        if (credentials) {
+            throw new ApiError("Username already taken.", 400);
+        }
 
+        const transactionAuth = await this.sequelizeAuth.transaction(); 
+        const transactionData = await this.sequelizeData.transaction(); 
         try {
-            const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
-            if (credentials) {
-                throw new ApiError("Username already taken.", 400);
-            }
-
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const user = (await this.userService.createUser(transaction)).get({ plain: true });
-            await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transaction );
+            const user = (await this.userService.createUser(transactionData)).get({ plain: true });
+            await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transactionAuth );
     
-            await transaction.commit();
-
+            await transactionAuth.commit();
+            await transactionData.commit();
         } catch (e) {
-            if (transaction) await transaction.rollback();
+            await transactionAuth.rollback();
+            await transactionData.rollback();
+            console.log(`Auth transaction failed ${(e as Error).stack}`)
             throw new ApiError("Registration failed. Please try again.", 500);
         }
     }

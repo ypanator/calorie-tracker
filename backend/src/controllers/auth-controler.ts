@@ -21,7 +21,7 @@ export default class AuthController {
 
         this.router.post("/logout", requireAuth, (req, res, next) => {
             try {
-                req.session.destroy(() => {});
+                req.session.destroy(err => { if (err) return next(err); });
                 res.clearCookie("connect.sid");
                 res.status(200).send("Logged out successfully.");
 

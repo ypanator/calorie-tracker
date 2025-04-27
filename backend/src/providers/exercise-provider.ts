@@ -1,6 +1,6 @@
 import { ModelStatic, DataTypes, Model, } from "sequelize";
 import { SequelizeData } from "../db/db";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import ApiError from "../error/api-error";
 import exerciseApiSchema from "../schemas/exercise-api-schema";
 import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type";
@@ -65,9 +65,11 @@ export default class ExerciseProvider {
             }
         };
 
-        const response = await axios.request(options);
-        if (response.status >= 400) {
-            console.log(`Exercises api error. - ${response.status} - ${response.data}`);
+        let response: AxiosResponse<any, any>;
+        try {
+            response = await axios.request(options);
+        } catch (e) {
+            console.log(`Error on calling the exercise api. ${(e as Error).stack}`);
             throw new ApiError("Searching for exercises is not available.", 500);
         }
 
@@ -76,9 +78,12 @@ export default class ExerciseProvider {
             responseData = exerciseApiSchema.parse(responseData);
         } catch (e) {
             if (e instanceof z.ZodError) {
-                console.log(`Exercises api parsing error. - ${e}`);
+                console.log(`Exercises api parsing error. - ${(e as Error).stack}`);
                 throw new ApiError("Searching for exercises is not available.", 500);
+            } else {
+                console.log(`${(e as Error).stack}`);
             }
+
         }
 
         return responseData;

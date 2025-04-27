@@ -25,11 +25,11 @@ export default class AuthProvider {
         this.sequelizeAuth.sync();
     }
 
-    async create(auth: Auth, transaction: Transaction): Promise<AuthModel> {
+    create(auth: Auth, transaction: Transaction): Promise<AuthModel> {
         return this.authModelStatic.create(auth, { transaction: transaction });
     }
 
-    async findCredentialsByUsername(username: string): Promise<AuthModel | null> {
+    findCredentialsByUsername(username: string): Promise<AuthModel | null> {
         return this.authModelStatic.findOne({ where: { username }});
     }
 }
