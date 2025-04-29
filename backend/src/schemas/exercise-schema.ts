@@ -8,5 +8,3 @@ const exerciseSchema = z.object({
 });
 
 export default exerciseSchema;
-
-export type Exercise = z.infer<typeof exerciseSchema>

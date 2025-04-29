@@ -11,7 +11,10 @@ export default class ExerciseService {
         this.exerciseProvider.add(exercise);
     }
 
-    async find(userId: number, query: string, duration: number): Promise<ExerciseApi> {
+    async find(userId: number | null, query: string, duration: number): Promise<ExerciseApi> {
+        if (userId === null) {
+            return await this.exerciseProvider.find(query, 75, duration);
+        }
         const user = (await this.userService.getUserAttributes(userId))?.get({ plain: true }) ?? null;
         if (!user) {
             console.log(`The session should be set at this point. ExerciseService.find()`);

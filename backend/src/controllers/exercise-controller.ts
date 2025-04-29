@@ -12,13 +12,13 @@ export default class ExerciseController {
     constructor(exerciseService: ExerciseService) {
         this.router = express.Router();
         
-        this.router.get("/find", requireAuth, async (req, res, next) => {
+        this.router.get("/find", async (req, res, next) => {
             try {
                 let query: string = typeof req.query.name === "string" ? req.query.name : "";
                 query = query.trim().replace(/[^a-zA-Z\s]/g, "");
         
                 if (!query) {
-                    throw new ApiError("Query must be a string and contain at least 1 letter.", 400);
+                    throw new ApiError("Name must be a string and contain at least 1 letter.", 400);
                 }
 
                 const durationStr = req.query.duration;
@@ -37,7 +37,7 @@ export default class ExerciseController {
                     throw new ApiError("Duration must be greater than 0.", 400);
                 }
 
-                const exercises: ExerciseApi = await exerciseService.find(req.session.userId!, query, durationInt);
+                const exercises: ExerciseApi = await exerciseService.find(req.session.userId || null, query, durationInt);
                 res.status(200).json({ exercises: exercises });
         
             } catch (e) { next(e); }
