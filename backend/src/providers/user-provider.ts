@@ -2,13 +2,19 @@ import { DataTypes, Model, ModelStatic, Sequelize, Transaction } from "sequelize
 import { User, UserApi, UserApiModel, UserAttributes, UserAttributesModel, UserModel, UserProfileModel } from "../types/user-type";
 import { SequelizeData } from "../db/db";
 import ExerciseProvider from "./exercise-provider";
+import FoodProvider from "./food-provider";
+import { INITIALLY_DEFERRED } from "sequelize/types/deferrable";
+import AuthProvider from "./auth-provider";
 
 export default class UserProvider {
     
     userModelStatic: ModelStatic<UserModel>;
+    exerciseProvider!: ExerciseProvider;
+    foodProvider!: FoodProvider;
+    authProvider!: AuthProvider;
     
     constructor(
-        private sequelizeData: SequelizeData, private exerciseProvider: ExerciseProvider, private foodProvider: FoodProvider) {
+        private sequelizeData: SequelizeData) {
             this.userModelStatic = sequelizeData.define("User", {
                 gender: {
                     type: DataTypes.ENUM("male", "female"),
@@ -60,13 +66,21 @@ export default class UserProvider {
                     validate: { len: [1, 200] }
                 },
             });
-            
-            this.userModelStatic.hasMany(this.exerciseProvider.exerciseModelStatic, { as: "exercises" });
-            this.userModelStatic.hasMany(this.foodProvider.foodModelStatic, { as: "foods" });
     };
+
+    init(exerciseProvider: ExerciseProvider, foodProvider: FoodProvider, authProvider: AuthProvider) {
+        this.exerciseProvider = exerciseProvider;
+        this.foodProvider = foodProvider;
+        this.authProvider = authProvider;
+
+        this.userModelStatic.hasMany(this.exerciseProvider.exerciseModelStatic, { as: "exercises" });
+        this.userModelStatic.hasMany(this.foodProvider.foodModelStatic, { as: "foods" });
+        this.userModelStatic.hasMany(this.authProvider.authModelStatic);
+
+    }
         
     createUser(user: User, transaction: Transaction): Promise<UserModel> {
-        return this.userModelStatic.create(user, { transaction });
+        return this.userModelStatic.create(user, { transaction, validate: true });
     };
         
     getUserProfileByUserId(userId: number): Promise<UserProfileModel | null> {
@@ -87,7 +101,7 @@ export default class UserProvider {
     };
     
     updateAttributes(userId: number, attributes: UserAttributes, transaction: Transaction): Promise<[affectedCount: number]> {
-        return this.userModelStatic.update(attributes, { where: { id: userId }, transaction});
+        return this.userModelStatic.update(attributes, { where: { id: userId }, transaction, validate: true });
     };
     
     getUserApiByUserId(userId: number): Promise<UserApiModel | null> {
@@ -97,6 +111,6 @@ export default class UserProvider {
     };
 
     updateUserApi(userId: number, apiData: UserApi, transaction: Transaction): Promise<[affectedCount: number]>{
-        return this.userModelStatic.update(apiData, { where: { id: userId }, transaction});
+        return this.userModelStatic.update(apiData, { where: { id: userId }, transaction, validate: true });
     };
 }

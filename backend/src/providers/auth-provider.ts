@@ -22,11 +22,10 @@ export default class AuthProvider {
         });
 
         this.authModelStatic.belongsTo(userProvider.userModelStatic);
-        this.sequelizeAuth.sync();
     }
 
     create(auth: Auth, transaction: Transaction): Promise<AuthModel> {
-        return this.authModelStatic.create(auth, { transaction: transaction });
+        return this.authModelStatic.create(auth, { transaction, validate: true });
     }
 
     findCredentialsByUsername(username: string): Promise<AuthModel | null> {

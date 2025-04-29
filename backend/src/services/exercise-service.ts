@@ -7,7 +7,7 @@ export default class ExerciseService {
     
     constructor(private exerciseProvider: ExerciseProvider, private userService: UserService) {}
     
-    async add(exercise: Exercise): Promise<ExerciseModel> {
+    add(exercise: Exercise): Promise<ExerciseModel> {
         return this.exerciseProvider.add(exercise);
     }
 

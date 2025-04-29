@@ -37,11 +37,10 @@ export default class ExerciseProvider {
                 allowNull: false,
             }
         });
-        this.exerciseModelStatic.sync();
     };
     
-    async add(exercise: Exercise): Promise<ExerciseModel> {
-        return this.exerciseModelStatic.create(exercise);
+    add(exercise: Exercise): Promise<ExerciseModel> {
+        return this.exerciseModelStatic.create(exercise, { validate: true });
     };
 
     async find(activity: string, weight: number, duration: number): Promise<ExerciseApi> {
