@@ -8,8 +8,8 @@ export default class FoodService {
     add(food: Food): Promise<FoodModel> {
         return this.foodProvider.add(food);
     }
-    find(query: string): Promise<Food[]> {
-        return this.foodProvider.find(query);
+    find(query: string, amount: number): Promise<Food> {
+        return this.foodProvider.find(query, amount);
     }
 
 }

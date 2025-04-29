@@ -19,8 +19,24 @@ export default class FoodControler {
                     throw new ApiError("Name must be a string and contain at least 1 letter.", 400);
                 }
 
-                const foods = await foodService.find(query);
-                res.status(200).json({ foods: foods })
+                const amountStr = req.query.amount;
+                if (amountStr === undefined) {
+                    throw new ApiError("Please provide the amount of the food.", 400);
+                }
+                if (typeof amountStr !== "string") { 
+                    throw new ApiError("Please provide the amount as a string.", 400);
+                }
+
+                const amountInt: number = parseInt(amountStr);
+                if (Number.isNaN(amountInt)) {
+                    throw new ApiError("Please provide a valid amount value.", 400);
+                }
+                if (amountInt <= 0) {
+                    throw new ApiError("Amount must be greater than 0.", 400);
+                }
+
+                const food = await foodService.find(query, amountInt);
+                res.status(200).json({ food: food })
 
             } catch (e) { next(e); }
         });
