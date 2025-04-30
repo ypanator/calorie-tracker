@@ -4,7 +4,7 @@ import { requireAuth } from "../middleware/auth-middleware";
 import ApiError from "../error/api-error";
 import foodSchema from "../schemas/food-schema";
 
-export default class FoodControler {
+export default class FoodController {
     router: Router;
 
     constructor(foodService: FoodService) {
