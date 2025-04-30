@@ -21,17 +21,17 @@ export default class UserProvider {
                     allowNull: false,
                 },
                 age: {
-                    type: DataTypes.NUMBER,
+                    type: DataTypes.INTEGER,
                     allowNull: false,
                     validate: { min: 1, max: 100 }
                 },
                 height: {
-                    type: DataTypes.NUMBER,
+                    type: DataTypes.INTEGER,
                     allowNull: false,
                     validate: { min: 120, max: 250 }
                 },
                 weight: {
-                    type: DataTypes.NUMBER,
+                    type: DataTypes.INTEGER,
                     allowNull: false,
                     validate: { min: 30, max: 300 }
                 },

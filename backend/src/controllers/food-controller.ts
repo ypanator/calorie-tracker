@@ -35,8 +35,8 @@ export default class FoodControler {
                     throw new ApiError("Amount must be greater than 0.", 400);
                 }
 
-                const food = await foodService.find(query, amountInt);
-                res.status(200).json({ food: food })
+                const foods = await foodService.find(query, amountInt);
+                res.status(200).json({ foods: foods })
 
             } catch (e) { next(e); }
         });

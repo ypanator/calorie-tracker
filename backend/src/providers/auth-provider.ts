@@ -15,7 +15,7 @@ export default class AuthProvider {
                 validate: { len: [1, 100] }
             },
             password: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
                 allowNull: false,
                 validate: { len: [1, 255] } // maybe shorter?
             }
