@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic, Transaction } from "sequelize";
-import { SequelizeAuth } from "../db/db";
-import UserProvider from "./user-provider";
-import { Auth, AuthModel } from "../types/auth-type";
+import { SequelizeAuth } from "../db/db.js";
+import UserProvider from "./user-provider.js";
+import { Auth, AuthModel } from "../types/auth-type.js";
 
 export default class AuthProvider {
 
@@ -21,7 +21,7 @@ export default class AuthProvider {
             }
         });
 
-        this.authModelStatic.belongsTo(userProvider.userModelStatic);
+        this.authModelStatic.belongsTo(userProvider.userModelStatic, { foreignKey: "userId" });
     }
 
     create(auth: Auth, transaction: Transaction): Promise<AuthModel> {

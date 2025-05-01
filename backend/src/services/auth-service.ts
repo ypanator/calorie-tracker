@@ -1,9 +1,10 @@
-import bcrypt from "bcrypt"
-import AuthProvider from "../providers/auth-provider";
-import ApiError from "../error/api-error";
-import { SequelizeAuth, SequelizeData } from "../db/db";
-import { Auth, AuthModel } from "../types/auth-type";
-import UserService from "./user-service";
+import bcrypt from "bcrypt";
+import { Transaction } from "sequelize";
+import AuthProvider from "../providers/auth-provider.js";
+import ApiError from "../error/api-error.js";
+import { SequelizeAuth, SequelizeData } from "../db/db.js";
+import { Auth, AuthModel } from "../types/auth-type.js";
+import UserService from "./user-service.js";
 
 export default class AuthService {
     

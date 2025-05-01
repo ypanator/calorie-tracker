@@ -1,7 +1,7 @@
-import ApiError from "../error/api-error";
-import ExerciseProvider from "../providers/exercise-provider";
-import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type";
-import UserService from "./user-service";
+import ApiError from "../error/api-error.js";
+import ExerciseProvider from "../providers/exercise-provider.js";
+import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type.js";
+import UserService from "./user-service.js";
 
 export default class ExerciseService {
     

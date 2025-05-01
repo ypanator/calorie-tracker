@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import ApiError from "../error/api-error";
-import rateLimit from 'express-rate-limit';
+import rateLimit from "express-rate-limit";
+import ApiError from "../error/api-error.js";
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.userId) {

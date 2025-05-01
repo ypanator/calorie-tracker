@@ -1,11 +1,11 @@
-import { z } from "zod";
+import { ZodError } from "zod";
 import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
-import ApiError from "./api-error";
-import sendResponse from "../send-response";
+import ApiError from "./api-error.js";
+import sendResponse from "../send-response.js";
 
-const errorHandler: ErrorRequestHandler = (err: ApiError | z.ZodError | Error, req: Request, res: Response): void => {
+const errorHandler: ErrorRequestHandler = (err: ApiError | ZodError | Error, req: Request, res: Response): void => {
     
-    if (err instanceof z.ZodError) {
+    if (err instanceof ZodError) {
         sendResponse(res, 400, "error", "Error parsing user input.", { error: err.errors });
     } else if (err instanceof Error) {
         console.log(err);

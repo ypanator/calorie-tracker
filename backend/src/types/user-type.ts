@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { Model } from "sequelize";
-import userSchema from "../schemas/user-schema";
-import { Exercise } from "./exercise-type";
-import { Food } from "./food-type";
+import userSchema from "../schemas/user-schema.js";
+import { Exercise } from "./exercise-type.js";
+import { Food } from "./food-type.js";
 
 export type UserAttributes = z.infer<typeof userSchema> & { id?: number };
 

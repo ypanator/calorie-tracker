@@ -1,5 +1,5 @@
-import FoodProvider from "../providers/food-provider";
-import { Food, FoodModel } from "../types/food-type";
+import FoodProvider from "../providers/food-provider.js";
+import { Food, FoodModel } from "../types/food-type.js";
 
 export default class FoodService {
 

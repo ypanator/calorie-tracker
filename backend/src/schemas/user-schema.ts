@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 const userSchema = z.object({
     gender: z.enum(["male", "female"]),

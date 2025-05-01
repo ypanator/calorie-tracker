@@ -1,9 +1,9 @@
-import express, { Router } from "express"
-import { requireAuth } from "../middleware/auth-middleware";
-import UserService from "../services/user-service";
-import userSchema from "../schemas/user-schema";
-import ApiError from "../error/api-error";
-import sendResponse from "../send-response";
+import express, { Router } from "express";
+import { requireAuth } from "../middleware/auth-middleware.js";
+import UserService from "../services/user-service.js";
+import userSchema from "../schemas/user-schema.js";
+import ApiError from "../error/api-error.js";
+import sendResponse from "../send-response.js";
 
 export default class UserController {
     router: Router;

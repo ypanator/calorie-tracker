@@ -1,8 +1,8 @@
-import express, { Router } from "express"
-import authSchema from "../schemas/auth-schema";
-import AuthService from "../services/auth-service";
-import { authLimiter, requireAuth } from "../middleware/auth-middleware";
-import sendResponse from "../send-response";
+import express, { Router } from "express";
+import authSchema from "../schemas/auth-schema.js";
+import AuthService from "../services/auth-service.js";
+import { authLimiter, requireAuth } from "../middleware/auth-middleware.js";
+import sendResponse from "../send-response.js";
 
 export default class AuthController {
     router: Router;

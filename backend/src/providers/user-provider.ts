@@ -1,10 +1,10 @@
 import { DataTypes, Model, ModelStatic, Sequelize, Transaction } from "sequelize";
-import { User, UserApi, UserApiModel, UserAttributes, UserAttributesModel, UserModel, UserProfileModel } from "../types/user-type";
-import { SequelizeData } from "../db/db";
-import ExerciseProvider from "./exercise-provider";
-import FoodProvider from "./food-provider";
+import { User, UserApi, UserApiModel, UserAttributes, UserAttributesModel, UserModel, UserProfileModel } from "../types/user-type.js";
+import { SequelizeData } from "../db/db.js";
+import ExerciseProvider from "./exercise-provider.js";
+import FoodProvider from "./food-provider.js";
 import { INITIALLY_DEFERRED } from "sequelize/types/deferrable";
-import AuthProvider from "./auth-provider";
+import AuthProvider from "./auth-provider.js";
 
 export default class UserProvider {
     
@@ -73,9 +73,9 @@ export default class UserProvider {
         this.foodProvider = foodProvider;
         this.authProvider = authProvider;
 
-        this.userModelStatic.hasMany(this.exerciseProvider.exerciseModelStatic, { as: "exercises" });
-        this.userModelStatic.hasMany(this.foodProvider.foodModelStatic, { as: "foods" });
-        this.userModelStatic.hasMany(this.authProvider.authModelStatic);
+        this.userModelStatic.hasMany(this.exerciseProvider.exerciseModelStatic, { as: "exercises", foreignKey: "userId"  });
+        this.userModelStatic.hasMany(this.foodProvider.foodModelStatic, { as: "foods", foreignKey: "userId"  });
+        this.userModelStatic.hasMany(this.authProvider.authModelStatic, { foreignKey: "userId" });
 
     }
         

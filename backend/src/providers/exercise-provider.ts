@@ -1,11 +1,11 @@
 import { ModelStatic, DataTypes, Model, } from "sequelize";
-import { SequelizeData } from "../db/db";
+import { SequelizeData } from "../db/db.js";
 import axios, { AxiosResponse } from "axios";
-import ApiError from "../error/api-error";
-import exerciseApiSchema from "../schemas/exercise-api-schema";
-import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type";
+import ApiError from "../error/api-error.js";
+import exerciseApiSchema from "../schemas/exercise-api-schema.js";
+import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type.js";
 import { z } from "zod";
-import UserProvider from "./user-provider";
+import UserProvider from "./user-provider.js";
 
 export default class ExerciseProvider {
     
@@ -31,12 +31,7 @@ export default class ExerciseProvider {
         });
         
         // maybe foreign key definition is redundant?
-        this.exerciseModelStatic.belongsTo(userProvider.userModelStatic, {
-            foreignKey: {
-                name: "userId",
-                allowNull: false,
-            }
-        });
+        this.exerciseModelStatic.belongsTo(userProvider.userModelStatic, { foreignKey: "userId" });
     };
     
     add(exercise: Exercise): Promise<ExerciseModel> {

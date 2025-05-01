@@ -1,9 +1,9 @@
-import express, { Router } from "express"
-import FoodService from "../services/food-service";
-import { requireAuth } from "../middleware/auth-middleware";
-import ApiError from "../error/api-error";
-import foodSchema from "../schemas/food-schema";
-import sendResponse from "../send-response";
+import express, { Router } from "express";
+import FoodService from "../services/food-service.js";
+import { requireAuth } from "../middleware/auth-middleware.js";
+import ApiError from "../error/api-error.js";
+import foodSchema from "../schemas/food-schema.js";
+import sendResponse from "../send-response.js";
 
 export default class FoodController {
     router: Router;

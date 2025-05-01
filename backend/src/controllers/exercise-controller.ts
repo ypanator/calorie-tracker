@@ -1,11 +1,11 @@
 import express, { Router } from "express"
 
-import ExerciseService from "../services/exercise-service";
-import exerciseSchema from "../schemas/exercise-schema";
-import ApiError from "../error/api-error";
-import { ExerciseApi } from "../types/exercise-type";
-import { requireAuth } from "../middleware/auth-middleware";
-import sendResponse from "../send-response";
+import ExerciseService from "../services/exercise-service.js";
+import exerciseSchema from "../schemas/exercise-schema.js";
+import ApiError from "../error/api-error.js";
+import { ExerciseApi } from "../types/exercise-type.js";
+import { requireAuth } from "../middleware/auth-middleware.js";
+import sendResponse from "../send-response.js";
 
 export default class ExerciseController {
     router: Router;

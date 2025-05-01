@@ -1,9 +1,9 @@
 import { DataTypes, ModelStatic } from "sequelize";
-import { SequelizeData } from "../db/db";
-import { Food, FoodModel } from "../types/food-type";
-import ApiError from "../error/api-error";
+import { SequelizeData } from "../db/db.js";
+import { Food, FoodModel } from "../types/food-type.js";
+import ApiError from "../error/api-error.js";
 import axios, { AxiosResponse } from "axios";
-import UserProvider from "./user-provider";
+import UserProvider from "./user-provider.js";
 
 export default class FoodProvider {
 
@@ -29,7 +29,7 @@ export default class FoodProvider {
             }
         });
 
-        this.foodModelStatic.belongsTo(userProvider.userModelStatic);
+        this.foodModelStatic.belongsTo(userProvider.userModelStatic, { foreignKey: "userId" });
     };
 
     async find(query: string, amount: number): Promise<Food[]> {
