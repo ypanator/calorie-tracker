@@ -40,7 +40,7 @@ export default class Server {
     private readonly authService: AuthService;
     private readonly authController: AuthController;
   
-    constructor() {
+    constructor(dependencies?: { sequelizeData?: SequelizeData, sequelizeAuth?: SequelizeAuth }) {
       this.app = express();
       this.SqliteStore = sqliteStoreFactory(session);
       dotenv.config()
@@ -68,8 +68,8 @@ export default class Server {
           }
       }));
     
-      this.sequelizeData = new SequelizeData();
-      this.sequelizeAuth = new SequelizeAuth();
+      this.sequelizeData = dependencies?.sequelizeData || new SequelizeData();
+      this.sequelizeAuth = dependencies?.sequelizeAuth || new SequelizeAuth();
     
       // Dependency Injection
       this.userProvider = new UserProvider(this.sequelizeData);
@@ -89,6 +89,9 @@ export default class Server {
       this.authController = new AuthController(this.authService);
     
       this.userProvider.init(this.exerciseProvider, this.foodProvider, this.authProvider);
+
+      this.sequelizeAuth.sync();
+      this.sequelizeData.sync();
     
       this.app.use("/exercise", this.exerciseController.router);
       this.app.use("/food", this.foodController.router);

@@ -72,7 +72,7 @@ export default class ExerciseProvider {
             throw new ApiError("Searching for exercises is not available.", 500);
         }
 
-        let responseData = response.data;
+        let responseData: ExerciseApi = response.data;
         try {
             responseData = exerciseApiSchema.parse(responseData);
         } catch (e) {
@@ -85,6 +85,6 @@ export default class ExerciseProvider {
 
         }
 
-        return responseData;
+        return responseData.slice(0, 5);
     }
 };

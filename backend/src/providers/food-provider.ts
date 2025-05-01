@@ -3,12 +3,13 @@ import { SequelizeData } from "../db/db";
 import { Food, FoodModel } from "../types/food-type";
 import ApiError from "../error/api-error";
 import axios, { AxiosResponse } from "axios";
+import UserProvider from "./user-provider";
 
 export default class FoodProvider {
 
     foodModelStatic: ModelStatic<FoodModel>;
 
-    constructor(private sequelizeData: SequelizeData) {
+    constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
         this.foodModelStatic = sequelizeData.define("Food", {
             name: {
                 type: DataTypes.STRING,
@@ -27,6 +28,8 @@ export default class FoodProvider {
                 validate: { len: [1, 100] }               
             }
         });
+
+        this.foodModelStatic.belongsTo(userProvider.userModelStatic);
     };
 
     async find(query: string, amount: number): Promise<Food[]> {
