@@ -70,42 +70,42 @@ export default class Server {
       this.sequelizeData = dependencies?.sequelizeData || new SequelizeData();
       this.sequelizeAuth = dependencies?.sequelizeAuth || new SequelizeAuth();
       
-      this.app.use(errorHandler);
-      
       // Dependency Injection
       this.userProvider = new UserProvider(this.sequelizeData);
       this.userService = new UserService(this.userProvider, this.sequelizeData);
       this.userController = new UserController(this.userService);
-    
+      
       this.exerciseProvider = new ExerciseProvider(this.sequelizeData, this.userProvider);
       this.exerciseService = new ExerciseService(this.exerciseProvider, this.userService);
       this.exerciseController = new ExerciseController(this.exerciseService);
-    
+      
       this.foodProvider = new FoodProvider(this.sequelizeData, this.userProvider);
       this.foodService = new FoodService(this.foodProvider);
       this.foodController = new FoodController(this.foodService);
-    
+      
       this.authProvider = new AuthProvider(this.sequelizeAuth, this.userProvider);
       this.authService = new AuthService(this.authProvider, this.sequelizeAuth, this.userService, this.sequelizeData);
       this.authController = new AuthController(this.authService);
-    
+      
       this.userProvider.init(this.exerciseProvider, this.foodProvider, this.authProvider);
-
+      
       this.sequelizeAuth.sync();
       this.sequelizeData.sync();
-    
+      
       this.app.use("/exercise", this.exerciseController.router);
       this.app.use("/food", this.foodController.router);
       this.app.use("/user", this.userController.router);
       this.app.use("/auth", this.authController.router);
-    
+      
       // testing endpoint
       this.app.get("/", (req, res) => { res.send("Hello World!") });
+      
+      this.app.use(errorHandler);
     }
   
     public start(port: number = 3000): void {
       this.app.listen(port, () => {
         console.log(`Server listening on port ${port}`);
       });
-    }
+    };
   }
