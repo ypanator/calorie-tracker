@@ -1,26 +1,26 @@
 import express from "express";
 import session from "express-session";
-import sqliteStoreFactory from "express-session-sqlite";
-import { Database } from "sqlite3";
+const { default: sqliteStoreFactory } = await import("express-session-sqlite");
+import sqlite from "sqlite3";
 import { Express } from 'express';
 
-import { SequelizeAuth, SequelizeData } from "./db/db";
-import dotenv from "dotenv"
+import { SequelizeAuth, SequelizeData } from "./db/db.js";
+import dotenv from "dotenv";
 
-import ExerciseProvider from "./providers/exercise-provider";
-import ExerciseService from "./services/exercise-service";
-import ExerciseController from "./controllers/exercise-controller";
+import ExerciseProvider from "./providers/exercise-provider.js";
+import ExerciseService from "./services/exercise-service.js";
+import ExerciseController from "./controllers/exercise-controller.js";
 import helmet from "helmet";
-import errorHandler from "./error/error-handler";
-import UserProvider from "./providers/user-provider";
-import UserService from "./services/user-service";
-import UserController from "./controllers/user-controller";
-import FoodProvider from "./providers/food-provider";
-import FoodService from "./services/food-service";
-import FoodController from "./controllers/food-controller";
-import AuthProvider from "./providers/auth-provider";
-import AuthService from "./services/auth-service";
-import AuthController from "./controllers/auth-controller";
+import errorHandler from "./error/error-handler.js";
+import UserProvider from "./providers/user-provider.js";
+import UserService from "./services/user-service.js";
+import UserController from "./controllers/user-controller.js";
+import FoodProvider from "./providers/food-provider.js";
+import FoodService from "./services/food-service.js";
+import FoodController from "./controllers/food-controller.js";
+import AuthProvider from "./providers/auth-provider.js";
+import AuthService from "./services/auth-service.js";
+import AuthController from "./controllers/auth-controller.js";
 
 export default class Server {
     private readonly app: Express;
@@ -43,7 +43,7 @@ export default class Server {
     constructor(dependencies?: { sequelizeData?: SequelizeData, sequelizeAuth?: SequelizeAuth }) {
       this.app = express();
       this.SqliteStore = sqliteStoreFactory(session);
-      dotenv.config()
+      dotenv.config({ path: "./src/keys.env" });
     
       const session_key: string = process.env.session_key || "";
       if (!session_key) {
@@ -52,25 +52,26 @@ export default class Server {
     
       this.app.use(helmet());
       this.app.use(express.json());
-      this.app.use(errorHandler);
       this.app.use(session({
-          store: new this.SqliteStore({
-            driver: Database,
-            path: "./db/sessions.sqlite",
-            ttl: 1000 * 60 * 60 * 24
-          }),
-          secret: session_key,
-          resave: false,
-          saveUninitialized: false,
-          cookie: {
-            secure: false,
-            maxAge: 1000 * 60 * 60 * 24
-          }
+        store: new this.SqliteStore({
+          driver: sqlite.Database,
+          path: "./db/sessions.sqlite",
+          ttl: 1000 * 60 * 60 * 24
+        }),
+        secret: session_key,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+          secure: false,
+          maxAge: 1000 * 60 * 60 * 24
+        }
       }));
-    
+      
       this.sequelizeData = dependencies?.sequelizeData || new SequelizeData();
       this.sequelizeAuth = dependencies?.sequelizeAuth || new SequelizeAuth();
-    
+      
+      this.app.use(errorHandler);
+      
       // Dependency Injection
       this.userProvider = new UserProvider(this.sequelizeData);
       this.userService = new UserService(this.userProvider, this.sequelizeData);
@@ -80,7 +81,7 @@ export default class Server {
       this.exerciseService = new ExerciseService(this.exerciseProvider, this.userService);
       this.exerciseController = new ExerciseController(this.exerciseService);
     
-      this.foodProvider = new FoodProvider(this.sequelizeData);
+      this.foodProvider = new FoodProvider(this.sequelizeData, this.userProvider);
       this.foodService = new FoodService(this.foodProvider);
       this.foodController = new FoodController(this.foodService);
     
