@@ -3,6 +3,7 @@ import FoodService from "../services/food-service";
 import { requireAuth } from "../middleware/auth-middleware";
 import ApiError from "../error/api-error";
 import foodSchema from "../schemas/food-schema";
+import sendResponse from "../send-response";
 
 export default class FoodController {
     router: Router;
@@ -36,14 +37,16 @@ export default class FoodController {
                 }
 
                 const foods = await foodService.find(query, amountInt);
-                res.status(200).json({ foods: foods })
+                sendResponse(res, 200, "success", "Foods retrieved.", { foods });
 
             } catch (e) { next(e); }
         });
 
         this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
-                await foodService.add({ ...foodSchema.parse(req.body), userId: req.session.userId! })
+                await foodService.add({ ...foodSchema.parse(req.body), userId: req.session.userId! });
+                sendResponse(res, 200, "success", "Food item successfuly added.");
+
             } catch (e) { next(e); }
         });
     }

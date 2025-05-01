@@ -5,6 +5,7 @@ import exerciseSchema from "../schemas/exercise-schema";
 import ApiError from "../error/api-error";
 import { ExerciseApi } from "../types/exercise-type";
 import { requireAuth } from "../middleware/auth-middleware";
+import sendResponse from "../send-response";
 
 export default class ExerciseController {
     router: Router;
@@ -38,7 +39,7 @@ export default class ExerciseController {
                 }
 
                 const exercises: ExerciseApi = await exerciseService.find(req.session.userId || null, query, durationInt);
-                res.status(200).json({ exercises: exercises });
+                sendResponse(res, 200, "success", "Retrieved exercises.", { exercises });
         
             } catch (e) { next(e); }
         });
@@ -46,7 +47,7 @@ export default class ExerciseController {
         this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
                 await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.session.userId! });
-                res.status(201).json("Exercise added.");
+                sendResponse(res, 201, "success", "Exercise added.");
         
             } catch (e) { next(e); }
         })

@@ -2,6 +2,7 @@ import express, { Router } from "express"
 import authSchema from "../schemas/auth-schema";
 import AuthService from "../services/auth-service";
 import { authLimiter, requireAuth } from "../middleware/auth-middleware";
+import sendResponse from "../send-response";
 
 export default class AuthController {
     router: Router;
@@ -15,7 +16,8 @@ export default class AuthController {
                 const userId: number = await authService.login(username, password);
 
                 req.session.userId = userId;
-                res.status(200).json("Successfuly logged in.");
+                sendResponse(res, 200, "success", "Successfuly logged in.");
+
             } catch (e) { next(e); }
         });
 
@@ -23,7 +25,7 @@ export default class AuthController {
             try {
                 req.session.destroy(err => { if (err) return next(err); });
                 res.clearCookie("connect.sid");
-                res.status(200).send("Logged out successfully.");
+                sendResponse(res, 200, "success", "Logged out successfully.")
 
             } catch (e) { next(e); }
         });
@@ -32,7 +34,7 @@ export default class AuthController {
             try {
                 const { username, password } = authSchema.parse(req.body);
                 await authService.register(username, password);
-                res.status(200).json("Successfuly registered.");
+                sendResponse(res, 200, "success", "Successfuly registered.");
 
             } catch (e) { next(e); }
         })

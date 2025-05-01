@@ -3,6 +3,7 @@ import { requireAuth } from "../middleware/auth-middleware";
 import UserService from "../services/user-service";
 import userSchema from "../schemas/user-schema";
 import ApiError from "../error/api-error";
+import sendResponse from "../send-response";
 
 export default class UserController {
     router: Router;
@@ -18,7 +19,8 @@ export default class UserController {
                     throw new ApiError("User does not exist.", 500);
                 }
 
-                res.status(200).json({ user: user }); 
+                sendResponse(res, 200, "success", "Profile successfuly retrieved.", { user })
+                
             } catch (e) { next(e); }
         });
 
@@ -28,7 +30,8 @@ export default class UserController {
                 const userId: number = req.session.userId!
                 const user = await userService.updateUserAttributes(userId, attributes);
 
-               res.status(200).json({ user: user }); 
+               sendResponse(res, 200, "success", "Attributes successfuly set.", { user });
+
             } catch (e) { next(e); }
         });
     };
