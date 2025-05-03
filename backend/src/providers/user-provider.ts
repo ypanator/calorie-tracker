@@ -13,8 +13,7 @@ export default class UserProvider {
     foodProvider!: FoodProvider;
     authProvider!: AuthProvider;
     
-    constructor(
-        private sequelizeData: SequelizeData) {
+    constructor(private sequelizeData: SequelizeData) {
             this.userModelStatic = sequelizeData.define("User", {
                 gender: {
                     type: DataTypes.ENUM("male", "female"),

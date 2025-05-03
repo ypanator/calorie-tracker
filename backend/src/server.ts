@@ -1,6 +1,5 @@
 import express from "express";
 import session from "express-session";
-const { default: sqliteStoreFactory } = await import("express-session-sqlite");
 import sqlite from "sqlite3";
 import { Express } from 'express';
 
@@ -11,7 +10,7 @@ import ExerciseProvider from "./providers/exercise-provider.js";
 import ExerciseService from "./services/exercise-service.js";
 import ExerciseController from "./controllers/exercise-controller.js";
 import helmet from "helmet";
-import errorHandler from "./error/error-handler.js";
+import errorHandler from "./middleware/error-handler.js";
 import UserProvider from "./providers/user-provider.js";
 import UserService from "./services/user-service.js";
 import UserController from "./controllers/user-controller.js";
@@ -22,28 +21,33 @@ import AuthProvider from "./providers/auth-provider.js";
 import AuthService from "./services/auth-service.js";
 import AuthController from "./controllers/auth-controller.js";
 
+// stupid aaahh cjs to esm magic
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const sqliteStoreFactory = require("express-session-sqlite").default;
+
 export default class Server {
-    private readonly app: Express;
-    private readonly SqliteStore: any;
-    private readonly sequelizeData: SequelizeData;
-    private readonly sequelizeAuth: SequelizeAuth;
-    private readonly userProvider: UserProvider;
-    private readonly userService: UserService;
-    private readonly userController: UserController;
-    private readonly exerciseProvider: ExerciseProvider;
-    private readonly exerciseService: ExerciseService;
-    private readonly exerciseController: ExerciseController;
-    private readonly foodProvider: FoodProvider;
-    private readonly foodService: FoodService;
-    private readonly foodController: FoodController;
-    private readonly authProvider: AuthProvider;
-    private readonly authService: AuthService;
-    private readonly authController: AuthController;
+    app!: Express;
+    SqliteStore!: any;
+    sequelizeData!: SequelizeData;
+    sequelizeAuth!: SequelizeAuth;
+    userProvider!: UserProvider;
+    userService!: UserService;
+    userController!: UserController;
+    exerciseProvider!: ExerciseProvider;
+    exerciseService!: ExerciseService;
+    exerciseController!: ExerciseController;
+    foodProvider!: FoodProvider;
+    foodService!: FoodService;
+    foodController!: FoodController;
+    authProvider!: AuthProvider;
+    authService!: AuthService;
+    authController!: AuthController;
   
-    constructor(dependencies?: { sequelizeData?: SequelizeData, sequelizeAuth?: SequelizeAuth }) {
+    async init(dependencies?: { sequelizeData?: SequelizeData, sequelizeAuth?: SequelizeAuth }) {
       this.app = express();
       this.SqliteStore = sqliteStoreFactory(session);
-      dotenv.config({ path: "./src/keys.env" });
+      dotenv.config({ path: "./keys.env" });
     
       const session_key: string = process.env.session_key || "";
       if (!session_key) {
@@ -67,8 +71,9 @@ export default class Server {
         }
       }));
       
-      this.sequelizeData = dependencies?.sequelizeData || new SequelizeData();
-      this.sequelizeAuth = dependencies?.sequelizeAuth || new SequelizeAuth();
+      
+      this.sequelizeData = dependencies && dependencies.sequelizeData ? dependencies.sequelizeData : new SequelizeData();
+      this.sequelizeAuth = dependencies && dependencies.sequelizeAuth ? dependencies.sequelizeAuth : new SequelizeAuth();
       
       // Dependency Injection
       this.userProvider = new UserProvider(this.sequelizeData);
@@ -89,8 +94,8 @@ export default class Server {
       
       this.userProvider.init(this.exerciseProvider, this.foodProvider, this.authProvider);
       
-      this.sequelizeAuth.sync();
-      this.sequelizeData.sync();
+      await this.sequelizeData.sync()
+      await this.sequelizeAuth.sync()
       
       this.app.use("/exercise", this.exerciseController.router);
       this.app.use("/food", this.foodController.router);
@@ -102,8 +107,8 @@ export default class Server {
       
       this.app.use(errorHandler);
     }
-  
-    public start(port: number = 3000): void {
+    
+    start(port: number = 3000): void {
       this.app.listen(port, () => {
         console.log(`Server listening on port ${port}`);
       });

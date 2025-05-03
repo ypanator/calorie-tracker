@@ -24,7 +24,7 @@ export default class AuthProvider {
         this.authModelStatic.belongsTo(userProvider.userModelStatic, { foreignKey: "userId" });
     }
 
-    create(auth: Auth, transaction: Transaction): Promise<AuthModel> {
+    create(auth: Auth, transaction?: Transaction): Promise<AuthModel> {
         return this.authModelStatic.create(auth, { transaction, validate: true });
     }
 
