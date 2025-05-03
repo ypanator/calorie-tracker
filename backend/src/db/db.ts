@@ -10,12 +10,3 @@ export class SequelizeData extends Sequelize {
         });
     }
 }
-
-export class SequelizeAuth extends Sequelize {
-    constructor() {
-        super({
-            dialect: "sqlite",
-            storage: "./src/db/auth.sqlite"
-        });
-    }
-}

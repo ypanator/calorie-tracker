@@ -12,7 +12,7 @@ export default class ExerciseProvider {
     exerciseModelStatic: ModelStatic<ExerciseModel>;
     
     constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
-        this.exerciseModelStatic = sequelizeData.define("Exercise", {
+        this.exerciseModelStatic = sequelizeData.define("exercise", {
             name: {
                 type: DataTypes.STRING(100),
                 allowNull: false,

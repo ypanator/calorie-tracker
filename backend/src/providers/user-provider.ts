@@ -14,7 +14,7 @@ export default class UserProvider {
     authProvider!: AuthProvider;
     
     constructor(private sequelizeData: SequelizeData) {
-            this.userModelStatic = sequelizeData.define("User", {
+            this.userModelStatic = sequelizeData.define("user", {
                 gender: {
                     type: DataTypes.ENUM("male", "female"),
                     allowNull: false,
@@ -74,7 +74,7 @@ export default class UserProvider {
 
         this.userModelStatic.hasMany(this.exerciseProvider.exerciseModelStatic, { as: "exercises", foreignKey: "userId"  });
         this.userModelStatic.hasMany(this.foodProvider.foodModelStatic, { as: "foods", foreignKey: "userId"  });
-        this.userModelStatic.hasMany(this.authProvider.authModelStatic, { foreignKey: "userId" });
+        this.userModelStatic.hasOne(this.authProvider.authModelStatic, { foreignKey: "userId" });
 
     }
         

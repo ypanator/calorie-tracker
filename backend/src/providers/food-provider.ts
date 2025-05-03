@@ -10,7 +10,7 @@ export default class FoodProvider {
     foodModelStatic: ModelStatic<FoodModel>;
 
     constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
-        this.foodModelStatic = sequelizeData.define("Food", {
+        this.foodModelStatic = sequelizeData.define("food", {
             name: {
                 type: DataTypes.STRING,
                 validate: { len: [1, 100] }

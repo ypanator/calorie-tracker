@@ -3,7 +3,7 @@ import session from "express-session";
 import sqlite from "sqlite3";
 import { Express } from 'express';
 
-import { SequelizeAuth, SequelizeData } from "./db/db.js";
+import { SequelizeData } from "./db/db.js";
 import dotenv from "dotenv";
 
 import ExerciseProvider from "./providers/exercise-provider.js";
@@ -30,7 +30,7 @@ export default class Server {
     app!: Express;
     SqliteStore!: any;
     sequelizeData!: SequelizeData;
-    sequelizeAuth!: SequelizeAuth;
+    sessionStore: any;
     userProvider!: UserProvider;
     userService!: UserService;
     userController!: UserController;
@@ -44,7 +44,7 @@ export default class Server {
     authService!: AuthService;
     authController!: AuthController;
   
-    async init(dependencies?: { sequelizeData?: SequelizeData, sequelizeAuth?: SequelizeAuth }) {
+    async init(dependencies?: { sequelizeData?: SequelizeData }) {
       this.app = express();
       this.SqliteStore = sqliteStoreFactory(session);
       dotenv.config({ path: "./keys.env" });
@@ -56,12 +56,16 @@ export default class Server {
     
       this.app.use(helmet());
       this.app.use(express.json());
+      
+      // Create and store session store instance
+      this.sessionStore = new this.SqliteStore({
+        driver: sqlite.Database,
+        path: "./src/db/sessions.sqlite",
+        ttl: 1000 * 60 * 60 * 24
+      });
+
       this.app.use(session({
-        store: new this.SqliteStore({
-          driver: sqlite.Database,
-          path: "./db/sessions.sqlite",
-          ttl: 1000 * 60 * 60 * 24
-        }),
+        store: this.sessionStore,
         secret: session_key,
         resave: false,
         saveUninitialized: false,
@@ -71,9 +75,7 @@ export default class Server {
         }
       }));
       
-      
       this.sequelizeData = dependencies && dependencies.sequelizeData ? dependencies.sequelizeData : new SequelizeData();
-      this.sequelizeAuth = dependencies && dependencies.sequelizeAuth ? dependencies.sequelizeAuth : new SequelizeAuth();
       
       // Dependency Injection
       this.userProvider = new UserProvider(this.sequelizeData);
@@ -88,14 +90,13 @@ export default class Server {
       this.foodService = new FoodService(this.foodProvider);
       this.foodController = new FoodController(this.foodService);
       
-      this.authProvider = new AuthProvider(this.sequelizeAuth, this.userProvider);
-      this.authService = new AuthService(this.authProvider, this.sequelizeAuth, this.userService, this.sequelizeData);
+      this.authProvider = new AuthProvider(this.sequelizeData, this.userProvider);
+      this.authService = new AuthService(this.authProvider, this.sequelizeData, this.userService);
       this.authController = new AuthController(this.authService);
       
       this.userProvider.init(this.exerciseProvider, this.foodProvider, this.authProvider);
       
       await this.sequelizeData.sync()
-      await this.sequelizeAuth.sync()
       
       this.app.use("/exercise", this.exerciseController.router);
       this.app.use("/food", this.foodController.router);

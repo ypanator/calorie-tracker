@@ -10,20 +10,10 @@ export class SequelizeData extends Sequelize {
     }
 }
 
-export class SequelizeAuth extends Sequelize {
-    constructor() {
-        super({
-            dialect: "sqlite",
-            storage: "./test/db/auth.sqlite"
-        });
-    }
-}
-
-const sequelizeAuth = new SequelizeAuth();
 const sequelizeData = new SequelizeData();
 
 const server: Server = new Server();
-await server.init({ sequelizeData, sequelizeAuth });
+await server.init({ sequelizeData });
 server.start();
 
-export { server, sequelizeAuth, sequelizeData };
+export { server, sequelizeData };

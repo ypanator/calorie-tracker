@@ -1,14 +1,14 @@
 import bcrypt from "bcrypt";
 import AuthProvider from "../providers/auth-provider.js";
 import ApiError from "../error/api-error.js";
-import { SequelizeAuth, SequelizeData } from "../db/db.js";
+import { SequelizeData } from "../db/db.js";
 import { AuthModel } from "../types/auth-type.js";
 import UserService from "./user-service.js";
 
 export default class AuthService {
     
     constructor(
-        private authProvider: AuthProvider, private sequelizeAuth: SequelizeAuth, private userService: UserService, private sequelizeData: SequelizeData
+        private authProvider: AuthProvider, private sequelizeData: SequelizeData, private userService: UserService
     ) {}
     
     async login(username: string, password: string): Promise<number> {
@@ -31,19 +31,16 @@ export default class AuthService {
             throw new ApiError("Username already taken.", 400);
         }
 
-        const transactionAuth = await this.sequelizeAuth.transaction(); 
-        const transactionData = await this.sequelizeData.transaction(); 
+        const transaction = await this.sequelizeData.transaction(); 
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const user = (await this.userService.createUser(transactionData)).get({ plain: true });
-            await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transactionAuth );
+            const user = (await this.userService.createUser(transaction)).get({ plain: true });
+            await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transaction);
     
-            await transactionAuth.commit();
-            await transactionData.commit();
+            await transaction.commit();
         } catch (e) {
-            await transactionAuth.rollback();
-            await transactionData.rollback();
+            await transaction.rollback();
             console.log(`Auth transaction failed ${(e as Error).stack}`)
             throw new ApiError("Registration failed. Please try again.", 500);
         }
