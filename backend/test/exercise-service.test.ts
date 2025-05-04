@@ -191,7 +191,7 @@ describe("ExerciseService.find method", () => {
         const user = await insertUser();
 
         // Mock API failure
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
         const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 

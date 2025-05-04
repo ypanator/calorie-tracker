@@ -8,8 +8,8 @@ import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type.js"
 import { z } from "zod";
 import UserProvider from "./user-provider.js";
 
+/** Exercise data and API provider */
 export default class ExerciseProvider {
-    
     exerciseModelStatic: ModelStatic<ExerciseModel>;
     exerciseAxios: AxiosInstance;
     
@@ -41,10 +41,19 @@ export default class ExerciseProvider {
         });
     };
     
+    /** Test helper to set axios instance */
+    setAxiosInstanceForTesting(axiosInstance: AxiosInstance) {
+        if (process.env.NODE_ENV === 'test') {
+            this.exerciseAxios = axiosInstance;
+        }
+    }
+    
+    /** Add new exercise record */
     add(exercise: Exercise): Promise<ExerciseModel> {
         return this.exerciseModelStatic.create(exercise, { validate: true });
     };
 
+    /** Find exercises and calculate calories based on weight */
     async find(activity: string, weight: number, duration: number): Promise<ExerciseApi> {
         const apiKey = process.env.exercise_api_key || "";
         if (!apiKey) {

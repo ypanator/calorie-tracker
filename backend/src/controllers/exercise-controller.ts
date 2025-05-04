@@ -1,5 +1,8 @@
+/** @swagger
+ * tags: [Exercises]
+ * description: Exercise management endpoints
+ */
 import express, { Router } from "express"
-
 import ExerciseService from "../services/exercise-service.js";
 import exerciseSchema from "../schemas/exercise-schema.js";
 import ApiError from "../error/api-error.js";
@@ -7,12 +10,31 @@ import { ExerciseApi } from "../types/exercise-type.js";
 import { requireAuth } from "../middleware/auth-middleware.js";
 import sendResponse from "../send-response.js";
 
+/** Exercise management controller */
 export default class ExerciseController {
     router: Router;
 
     constructor(exerciseService: ExerciseService) {
         this.router = express.Router();
         
+        /** @swagger
+         * /exercise/find:
+         *   get:
+         *     summary: Find exercises by name and duration
+         *     tags: [Exercises]
+         *     parameters:
+         *       - in: query
+         *         name: name
+         *         required: true
+         *         schema: { type: string }
+         *       - in: query
+         *         name: duration
+         *         required: true
+         *         schema: { type: integer }
+         *     responses:
+         *       200: { description: Exercises found }
+         *       400: { description: Invalid input }
+         */
         this.router.get("/find", async (req, res, next) => {
             try {
                 let query: string = typeof req.query.name === "string" ? req.query.name : "";
@@ -44,12 +66,28 @@ export default class ExerciseController {
             } catch (e) { next(e); }
         });
 
+        /** @swagger
+         * /exercise/add:
+         *   post:
+         *     summary: Add new exercise
+         *     tags: [Exercises]
+         *     security: [{ sessionAuth: [] }]
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema: { $ref: '#/components/schemas/Exercise' }
+         *     responses:
+         *       201: { description: Exercise added }
+         *       400: { description: Invalid input }
+         *       401: { description: Unauthorized }
+         */
         this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
                 await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.session.userId! });
                 sendResponse(res, 201, "success", "Exercise added.");
         
             } catch (e) { next(e); }
-        })
-    };
-};
+        });
+    }
+}

@@ -1,3 +1,8 @@
+/** @swagger
+ * /food:
+ *   tags: [Foods]
+ *   description: Food management endpoints
+ */
 import express, { Router } from "express";
 import FoodService from "../services/food-service.js";
 import { requireAuth } from "../middleware/auth-middleware.js";
@@ -5,12 +10,33 @@ import ApiError from "../error/api-error.js";
 import foodSchema from "../schemas/food-schema.js";
 import sendResponse from "../send-response.js";
 
+/** Food management controller */
 export default class FoodController {
     router: Router;
 
     constructor(foodService: FoodService) {
         this.router = express.Router();
 
+        /** @swagger
+         * /food/find:
+         *   get:
+         *     summary: Find foods by name and amount
+         *     tags: [Foods]
+         *     security: [{ sessionAuth: [] }]
+         *     parameters:
+         *       - in: query
+         *         name: name
+         *         required: true
+         *         schema: { type: string }
+         *       - in: query
+         *         name: amount
+         *         required: true
+         *         schema: { type: integer }
+         *     responses:
+         *       200: { description: Foods found }
+         *       400: { description: Invalid input }
+         *       401: { description: Unauthorized }
+         */
         this.router.get("/find", requireAuth, async (req, res, next) => {
             try {
                 let query: string = typeof req.query.name === "string" ? req.query.name : "";
@@ -42,6 +68,22 @@ export default class FoodController {
             } catch (e) { next(e); }
         });
 
+        /** @swagger
+         * /food/add:
+         *   post:
+         *     summary: Add new food
+         *     tags: [Foods]
+         *     security: [{ sessionAuth: [] }]
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema: { $ref: '#/components/schemas/Food' }
+         *     responses:
+         *       200: { description: Food added }
+         *       400: { description: Invalid input }
+         *       401: { description: Unauthorized }
+         */
         this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
                 await foodService.add({ ...foodSchema.parse(req.body), userId: req.session.userId! });
@@ -50,5 +92,4 @@ export default class FoodController {
             } catch (e) { next(e); }
         });
     }
-
-};
+}

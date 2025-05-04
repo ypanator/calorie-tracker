@@ -6,9 +6,12 @@ import { UserAttributes, UserApi, User, UserAttributesModel, UserProfileModel, U
 import ApiError from "../error/api-error.js";
 import { SequelizeData } from "../db/db.js";
 
+/**
+ * Service class handling user-related operations and nutrition calculations
+ */
 export default class UserService {
     
-    userAxios: AxiosInstance
+userAxios: AxiosInstance
 
     constructor(private userProvider: UserProvider, private sequelizeData: SequelizeData) {
         this.userAxios = axios.create();
@@ -18,6 +21,24 @@ export default class UserService {
         });
     }
 
+    /**
+     * Sets the axios instance for testing purposes
+     * @param axiosInstance The axios instance to use
+     * @internal
+     */
+    setAxiosInstanceForTesting(axiosInstance: AxiosInstance) {
+        if (process.env.NODE_ENV === 'test') {
+            this.userAxios = axiosInstance;
+        }
+    }
+
+    /**
+     * Updates user attributes and calculates nutrition information
+     * @param userId The ID of the user to update
+     * @param attributes The new user attributes (weight, height, age, gender)
+     * @returns Promise resolving to calculated nutrition information
+     * @throws {ApiError} If the API call fails or data cannot be saved
+     */
     async updateUserAttributes(userId: number, attributes: UserAttributes): Promise<UserApi> {
         const apiKey = process.env.user_api_key || "";
         if (!apiKey) {
@@ -74,18 +95,38 @@ export default class UserService {
         return truncatedData;
     }
 
+    /**
+     * Retrieves user attributes by user ID
+     * @param userId The ID of the user
+     * @returns Promise resolving to user attributes model or null if not found
+     */
     getUserAttributes(userId: number): Promise<UserAttributesModel | null> {
         return this.userProvider.getUserAttributesByUserId(userId);
     }
 
+    /**
+     * Retrieves basic user information by user ID
+     * @param userId The ID of the user
+     * @returns Promise resolving to user model or null if not found
+     */
     getUser(userId: number): Promise<UserModel | null> {
         return this.userProvider.getUserByUserId(userId);
     }
 
+    /**
+     * Retrieves complete user profile including attributes and nutrition info
+     * @param userId The ID of the user
+     * @returns Promise resolving to user profile model or null if not found
+     */
     getUserProfile(userId: number): Promise<UserProfileModel | null> {
         return this.userProvider.getUserProfileByUserId(userId);
     }
 
+    /**
+     * Creates a new user with default attributes and nutrition values
+     * @param transaction The database transaction to use for the creation
+     * @returns Promise resolving to the created user model
+     */
     createUser(transaction: Transaction): Promise<UserModel> {
         const defaultUser: User = {
             gender: "male",
@@ -103,6 +144,4 @@ export default class UserService {
 
         return this.userProvider.createUser(defaultUser, transaction);
     }
-
-
 };

@@ -1,6 +1,8 @@
 import express from "express";
 import session from "express-session";
 import { Express } from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger.js';
 
 import { SequelizeData } from "./db/db.js";
 import dotenv from "dotenv";
@@ -47,6 +49,9 @@ export default class Server {
     
       this.app.use(helmet());
       this.app.use(express.json());
+
+      // Add Swagger UI
+      this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
       this.app.use(session({
         secret: session_key,

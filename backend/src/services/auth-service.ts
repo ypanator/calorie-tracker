@@ -5,12 +5,22 @@ import { SequelizeData } from "../db/db.js";
 import { AuthModel } from "../types/auth-type.js";
 import UserService from "./user-service.js";
 
+/**
+ * Service class handling user authentication and registration
+ */
 export default class AuthService {
     
     constructor(
         private authProvider: AuthProvider, private sequelizeData: SequelizeData, private userService: UserService
     ) {}
     
+    /**
+     * Authenticates a user with username and password
+     * @param username The username to authenticate
+     * @param password The password to verify
+     * @returns Promise resolving to the user ID if authentication is successful
+     * @throws {ApiError} If credentials are incorrect or user doesn't exist
+     */
     async login(username: string, password: string): Promise<number> {
         const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
         if (!credentials) { 
@@ -25,6 +35,12 @@ export default class AuthService {
         return userId!;
     };  
 
+    /**
+     * Registers a new user with username and password
+     * @param username The username for the new account
+     * @param password The password for the new account
+     * @throws {ApiError} If username is taken or registration fails
+     */
     async register(username: string, password: string): Promise<void> {
         const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
         if (credentials) {

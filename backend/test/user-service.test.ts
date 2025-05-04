@@ -141,7 +141,7 @@ describe("UserService.updateUserAttributes method", () => {
 
         type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
         const requestMock = jest.fn<RequestFunction>().mockResolvedValue(mockResponse);
-        server.userService.userAxios.request = requestMock as any;
+                server.userService.userAxios.request = requestMock as any;
 
         const result = await server.userService.updateUserAttributes(user.id!, newAttributes);
         
@@ -173,7 +173,7 @@ describe("UserService.updateUserAttributes method", () => {
         // Mock API failure with proper typing
         type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
         const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
-        server.userService.userAxios.request = requestMock as any;
+                server.userService.userAxios.request = requestMock as any;
 
         try {
             await server.userService.updateUserAttributes(user.id!, newAttributes);

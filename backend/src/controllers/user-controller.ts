@@ -1,3 +1,7 @@
+/** @swagger
+ * tags: [Users]
+ * description: User profile management endpoints
+ */
 import express, { Router } from "express";
 import { requireAuth } from "../middleware/auth-middleware.js";
 import UserService from "../services/user-service.js";
@@ -5,12 +9,24 @@ import userSchema from "../schemas/user-schema.js";
 import ApiError from "../error/api-error.js";
 import sendResponse from "../send-response.js";
 
+/** User profile management controller */
 export default class UserController {
     router: Router;
 
     constructor(userService: UserService) {
         this.router = express.Router();
 
+        /** @swagger
+         * /user/profile:
+         *   get:
+         *     summary: Get user profile
+         *     tags: [Users]
+         *     security: [{ sessionAuth: [] }]
+         *     responses:
+         *       200: { description: Profile retrieved }
+         *       401: { description: Unauthorized }
+         *       500: { description: User not found }
+         */
         this.router.get("/profile", requireAuth, async (req, res, next) => {
             try {
                 const user = (await userService.getUserProfile(req.session.userId!))?.get({ plain: true }) ?? null;
@@ -24,6 +40,22 @@ export default class UserController {
             } catch (e) { next(e); }
         });
 
+        /** @swagger
+         * /user/set-attr:
+         *   post:
+         *     summary: Update user attributes
+         *     tags: [Users]
+         *     security: [{ sessionAuth: [] }]
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema: { $ref: '#/components/schemas/UserAttributes' }
+         *     responses:
+         *       200: { description: Attributes updated }
+         *       400: { description: Invalid input }
+         *       401: { description: Unauthorized }
+         */
         this.router.post("/set-attr", requireAuth, async (req, res, next) => {
             try {
                 const attributes = userSchema.parse(req.body);
@@ -34,5 +66,5 @@ export default class UserController {
 
             } catch (e) { next(e); }
         });
-    };
+    }
 }

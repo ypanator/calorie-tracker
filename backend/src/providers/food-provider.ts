@@ -6,8 +6,8 @@ import axios, { AxiosInstance } from "axios";
 import axiosRetry from "axios-retry";
 import UserProvider from "./user-provider.js";
 
+/** Food data and Nutritionix API provider */
 export default class FoodProvider {
-
     foodModelStatic: ModelStatic<FoodModel>;
     foodAxios: AxiosInstance;
 
@@ -40,7 +40,7 @@ export default class FoodProvider {
         });
     };
 
-    async find(query: string, amount: number): Promise<Food[]> {
+        async find(query: string, amount: number): Promise<Food[]> {
         const apiKey = process.env.food_api_key || null;
         if (!apiKey) {
             console.log("Missing foods api key.");
@@ -58,6 +58,7 @@ export default class FoodProvider {
         return commonResult.concat(brandedResult);
     }
 
+    /** Get initial search results from API */
     private async getItems(query: string, amount: number, apiKey: string, apiId: string): Promise<{
         common: (Food & { searchId: string })[], branded: (Food & { searchId: string })[]
     }> {
@@ -107,6 +108,7 @@ export default class FoodProvider {
         return {common: commonResult, branded: brandedResult}
     }
 
+    /** Get details for branded foods */
     private async getBrandedDetailed(items: (Food & { searchId: string })[], amount: number, apiKey: string, apiId: string): Promise<Food[]> {
         if (items.length === 0) return [];
 
@@ -137,6 +139,7 @@ export default class FoodProvider {
         return Promise.all(tasks);
     }
 
+    /** Get details for common foods */
     private async getCommonDetailed(items: (Food & { searchId: string })[], amount: number, apiKey: string, apiId: string): Promise<Food[]> {
         if (items.length === 0) return [];
 
@@ -171,6 +174,7 @@ export default class FoodProvider {
         return Promise.all(tasks);
     }
 
+    /** Add new food record */
     add(food: Food): Promise<FoodModel> {
         return this.foodModelStatic.create(food, { validate: true });
     }
