@@ -1,6 +1,7 @@
-import { ModelStatic, DataTypes, Model, } from "sequelize";
+import { ModelStatic, DataTypes } from "sequelize";
 import { SequelizeData } from "../db/db.js";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosInstance } from "axios";
+import axiosRetry from "axios-retry";
 import ApiError from "../error/api-error.js";
 import exerciseApiSchema from "../schemas/exercise-api-schema.js";
 import { Exercise, ExerciseApi, ExerciseModel } from "../types/exercise-type.js";
@@ -10,6 +11,7 @@ import UserProvider from "./user-provider.js";
 export default class ExerciseProvider {
     
     exerciseModelStatic: ModelStatic<ExerciseModel>;
+    exerciseAxios: AxiosInstance;
     
     constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
         this.exerciseModelStatic = sequelizeData.define("exercise", {
@@ -30,8 +32,13 @@ export default class ExerciseProvider {
             }
         });
         
-        // maybe foreign key definition is redundant?
         this.exerciseModelStatic.belongsTo(userProvider.userModelStatic, { foreignKey: "userId" });
+
+        this.exerciseAxios = axios.create();
+        axiosRetry(this.exerciseAxios, {
+            retries: 5,
+            retryDelay: axiosRetry.exponentialDelay,
+        });
     };
     
     add(exercise: Exercise): Promise<ExerciseModel> {
@@ -59,9 +66,9 @@ export default class ExerciseProvider {
             }
         };
 
-        let response: AxiosResponse<any, any>;
+        let response;
         try {
-            response = await axios.request(options);
+            response = await this.exerciseAxios.request(options);
         } catch (e) {
             console.log(`Error on calling the exercise api. ${(e as Error).stack}`);
             throw new ApiError("Searching for exercises is not available.", 500);
@@ -77,7 +84,6 @@ export default class ExerciseProvider {
             } else {
                 console.log(`${(e as Error).stack}`);
             }
-
         }
 
         return responseData.slice(0, 5);

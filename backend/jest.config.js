@@ -8,10 +8,9 @@ export default {
     'ts-jest': {
       useESM: true,                            // enable ESM mode in ts-jest
     },
-  },
+  },  
   moduleNameMapper: {
     // if you import .ts files without specifying extensions:
     '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
-  setupFiles: ['<rootDir>/test/test-objects.ts'],
+  }
 };

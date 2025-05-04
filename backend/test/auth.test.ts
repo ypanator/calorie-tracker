@@ -2,17 +2,18 @@ import { Sequelize } from "sequelize";
 import ApiError from "../src/error/api-error.ts";
 import Server from "../src/server.ts";
 import { SequelizeData } from "../src/db/db.ts";
+import { jest } from '@jest/globals';
 
 let sequelizeData: SequelizeData;
 let server: Server;
 
 beforeAll(async () => {
-
     class SequelizeData extends Sequelize {
         constructor() {
             super({
                 dialect: "sqlite",
-                storage: "./test/db/data.sqlite"
+                storage: "./test/db/data.sqlite",
+                logging: false
             });
         }
     }
@@ -22,14 +23,12 @@ beforeAll(async () => {
     await server.init({ sequelizeData });
 });
 
-
-const truncateAll = async (sequelize: Sequelize) => {
-    for (const model of Object.values(sequelize.models)) {
-        await model.destroy({ truncate: true, cascade: true });
-    }
-};
+afterAll(async () => {
+    await server.close();
+})
 
 beforeEach(async () => {
+    // cleans all tables
     await sequelizeData.sync({ force: true });
 });
 
@@ -55,15 +54,15 @@ const insertCredentials = async () => {
 };
 
 describe("AuthService.login method", () => {
-    // it("should throw error on not registered user.", async () => {
-    //     try {
-    //         await server.authService.login("test", "test");
-    //     } catch (error) {
-    //         expect(error).toBeInstanceOf(ApiError);
-    //         expect((error as ApiError).msg).toBe("Incorrect credentials.");
-    //         expect((error as ApiError).code).toBe(401);
-    //     }
-    // });
+    it("should throw error on not registered user.", async () => {
+        try {
+            await server.authService.login("test", "test");
+        } catch (error) {
+            expect(error).toBeInstanceOf(ApiError);
+            expect((error as ApiError).msg).toBe("Incorrect credentials.");
+            expect((error as ApiError).code).toBe(401);
+        }
+    });
 
     it("should throw on incorrect username.", async () => {
         try {
@@ -76,14 +75,46 @@ describe("AuthService.login method", () => {
         }
     });
 
-    // it("should throw on incorrect password.", async () => {
-    //     try {
-    //         await insertCredentials();
-    //         await server.authService.login("test", "test1");
-    //     } catch (error) {
-    //         expect(error).toBeInstanceOf(ApiError);
-    //         expect((error as ApiError).msg).toBe("Incorrect credentials.");
-    //         expect((error as ApiError).code).toBe(401);
-    //     }
-    // });
+    it("should throw on incorrect password.", async () => {
+        try {
+            await insertCredentials();
+            await server.authService.login("test", "test1");
+        } catch (error) {
+            expect(error).toBeInstanceOf(ApiError);
+            expect((error as ApiError).msg).toBe("Incorrect credentials.");
+            expect((error as ApiError).code).toBe(401);
+        }
+    });
+
+    it("should return userId on successful login.", async () => {
+        await insertCredentials();
+        const userId = await server.authService.login("test", "test");
+        expect(typeof userId).toBe("number");
+    });
+});
+
+describe("AuthService.register method", () => {
+    it("should throw on duplicate username.", async () => {
+        try {
+            await insertCredentials();
+            await server.authService.register("test", "test");
+        } catch (error) {
+            expect(error).toBeInstanceOf(ApiError);
+            expect((error as ApiError).msg).toBe("Username already taken.");
+            expect((error as ApiError).code).toBe(400);
+        }
+    });
+
+    it("should create user and auth records on successful registration.", async () => {
+        await server.authService.register("test", "test");
+        const auth = await server.authProvider.findCredentialsByUsername("test");
+        expect(auth).not.toBeNull();
+        
+        const credentials = auth!.get({ plain: true });
+        expect(credentials.username).toBe("test");
+        expect(credentials.userId).toBeDefined();
+        
+        const user = await server.userService.getUser(credentials.userId!);
+        expect(user).not.toBeNull();
+    });
 });

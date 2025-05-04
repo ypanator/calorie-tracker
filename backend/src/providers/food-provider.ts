@@ -2,12 +2,14 @@ import { DataTypes, ModelStatic } from "sequelize";
 import { SequelizeData } from "../db/db.js";
 import { Food, FoodModel } from "../types/food-type.js";
 import ApiError from "../error/api-error.js";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosInstance } from "axios";
+import axiosRetry from "axios-retry";
 import UserProvider from "./user-provider.js";
 
 export default class FoodProvider {
 
     foodModelStatic: ModelStatic<FoodModel>;
+    foodAxios: AxiosInstance;
 
     constructor(private sequelizeData: SequelizeData, private userProvider: UserProvider) {
         this.foodModelStatic = sequelizeData.define("food", {
@@ -30,25 +32,31 @@ export default class FoodProvider {
         });
 
         this.foodModelStatic.belongsTo(userProvider.userModelStatic, { foreignKey: "userId" });
+
+        this.foodAxios = axios.create();
+        axiosRetry(this.foodAxios, {
+            retries: 5,
+            retryDelay: axiosRetry.exponentialDelay,
+        });
     };
 
     async find(query: string, amount: number): Promise<Food[]> {
         const apiKey = process.env.food_api_key || null;
         if (!apiKey) {
             console.log("Missing foods api key.");
-            throw new ApiError("Searching for food is not available.", 500);
+            throw new ApiError("Searching for foods is not available.", 500);
         }
         const apiId = process.env.food_api_id || null;
         if (!apiId) {
             console.log("Missing foods api id.");
-            throw new ApiError("Searching for food is not available.", 500);
+            throw new ApiError("Searching for foods is not available.", 500);
         }
 
         const items = await this.getItems(query, amount, apiKey, apiId);
-        const commonResult = await this.getCommonDetailed(items.common, apiKey, apiId);
-        const brandedResult = await this.getBrandedDetailed(items.branded, apiKey, apiId)
+        const commonResult = await this.getCommonDetailed(items.common, amount, apiKey, apiId);
+        const brandedResult = await this.getBrandedDetailed(items.branded, amount, apiKey, apiId)
         return commonResult.concat(brandedResult);
-    };
+    }
 
     private async getItems(query: string, amount: number, apiKey: string, apiId: string): Promise<{
         common: (Food & { searchId: string })[], branded: (Food & { searchId: string })[]
@@ -63,9 +71,9 @@ export default class FoodProvider {
             }
         };
 
-        let response: AxiosResponse<any, any>;
+        let response;
         try {
-            response = await axios.request(options);
+            response = await this.foodAxios.request(options);
         } catch (e) {
             console.log(`Error on calling the food api. ${(e as Error).stack}`);
             throw new ApiError("Searching for foods is not available.", 500);
@@ -80,7 +88,7 @@ export default class FoodProvider {
             commonResult.push({
                 searchId: common[i]["food_name"],
                 name: common[i]["food_name"],
-                calories: -1, // placeholder value, to be filled by this.getDetailed()
+                calories: -1, // placeholder value, to be filled by getCommonDetailed
                 count: amount,
                 unit: common[i]["serving_unit"]
             });
@@ -90,7 +98,7 @@ export default class FoodProvider {
             brandedResult.push({
                 searchId: branded[i]["nix_item_id"],
                 name: branded[i]["food_name"],
-                calories: -1, // placeholder value, to be filled by this.getDetailed()
+                calories: -1, // placeholder value, to be filled by getBrandedDetailed
                 count: amount,
                 unit: branded[i]["serving_unit"]
             });
@@ -99,39 +107,38 @@ export default class FoodProvider {
         return {common: commonResult, branded: brandedResult}
     }
 
-    private async getBrandedDetailed(items: (Food & { searchId: string })[], apiKey: string, apiId: string): Promise<Food[]> {
+    private async getBrandedDetailed(items: (Food & { searchId: string })[], amount: number, apiKey: string, apiId: string): Promise<Food[]> {
+        if (items.length === 0) return [];
 
-        const options = {
-            'method': 'GET',
-            'headers': {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'x-app-id': apiId,
-                'x-app-key': apiKey
-            }
-        };
-        
         const tasks = items.map((item) => {
-            return axios.request({
-                ...options,
-                url: `https://trackapi.nutritionix.com/v2/search/item/?upc=${item.searchId}`
-            })
-            .then((response) => ({
-                name: item.name,
-                calories: response.data["foods"][0]["nf_calories"] * item.count,
-                count: item.count,
-                unit: item.unit
-            }))
-            .catch((e) => {
-                console.log(`Error on calling the food api. ${(e as Error).stack}`);
-                throw new ApiError("Searching for foods is not available.", 500);
-            });
+            const options = {
+                method: 'GET',
+                url: `https://trackapi.nutritionix.com/v2/search/item?nix_item_id=${item.searchId}`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-app-id': apiId,
+                    'x-app-key': apiKey
+                }
+            };
+        
+            return this.foodAxios.request(options)
+                .then((response) => ({
+                    name: item.name,
+                    calories: Math.round(response.data["foods"][0]["nf_calories"] * amount),
+                    count: amount,
+                    unit: item.unit
+                }))
+                .catch((e) => {
+                    console.log(`Error on calling the food api. ${(e as Error).stack}`);
+                    throw new ApiError("Searching for foods is not available.", 500);
+                });
         });
 
-        const result: Food[] = await Promise.all(tasks);
-        return result;
+        return Promise.all(tasks);
     }
 
-    private async getCommonDetailed(items: (Food & { searchId: string })[], apiKey: string, apiId: string): Promise<Food[]> {
+    private async getCommonDetailed(items: (Food & { searchId: string })[], amount: number, apiKey: string, apiId: string): Promise<Food[]> {
+        if (items.length === 0) return [];
 
         const tasks = items.map((item) => {
             const options = {
@@ -144,15 +151,15 @@ export default class FoodProvider {
                 },
                 data: {
                     query: item.searchId,
-                    num_servings: item.count
+                    num_servings: 1  // Get calories for 1 serving, we'll multiply later
                 }
             };
         
-            return axios.request(options)
+            return this.foodAxios.request(options)
                 .then((response) => ({
                     name: item.name,
-                    calories: response.data["foods"][0]["nf_calories"],
-                    count: item.count,
+                    calories: Math.round(response.data["foods"][0]["nf_calories"] * amount),  // Multiply by amount like we do for branded foods
+                    count: amount,
                     unit: item.unit
                 }))
                 .catch((e) => {
@@ -161,11 +168,10 @@ export default class FoodProvider {
                 });
         });
         
-        const result: Food[] = await Promise.all(tasks);
-        return result;
+        return Promise.all(tasks);
     }
 
     add(food: Food): Promise<FoodModel> {
         return this.foodModelStatic.create(food, { validate: true });
-    };
-}
+    }
+};
