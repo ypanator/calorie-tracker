@@ -1,10 +1,5 @@
-import { Sequelize } from "sequelize";
-import ApiError from "../src/error/api-error.ts";
 import Server from "../src/server.ts";
 import { SequelizeData } from "../src/db/db.ts";
-import { jest } from '@jest/globals';
-import { ExerciseApi } from "../src/types/exercise-type.ts";
-import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
 import { createRequestMock, createSequelizeData, createServer, defaultUser } from "./test-utils.ts";
 import { createMockAxiosResponse } from "./test-utils.ts";
 

@@ -3,7 +3,6 @@ import { User, UserApi, UserApiModel, UserAttributes, UserAttributesModel, UserM
 import { SequelizeData } from "../db/db.js";
 import ExerciseProvider from "./exercise-provider.js";
 import FoodProvider from "./food-provider.js";
-import { INITIALLY_DEFERRED } from "sequelize/types/deferrable";
 import AuthProvider from "./auth-provider.js";
 
 /**

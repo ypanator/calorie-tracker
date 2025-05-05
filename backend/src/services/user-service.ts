@@ -1,6 +1,6 @@
 import { Transaction } from "sequelize";
 import UserProvider from "../providers/user-provider.js";
-import axios, { Axios, AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import axiosRetry from "axios-retry";
 import { UserAttributes, UserApi, User, UserAttributesModel, UserProfileModel, UserModel, UserApiModel, UserProfile } from "../types/user-type.js";
 import ApiError from "../error/api-error.js";
