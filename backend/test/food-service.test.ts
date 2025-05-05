@@ -4,7 +4,8 @@ import Server from "../src/server.ts";
 import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
-import { createSequelizeData, createServer } from "./test-utils.ts";
+import { createSequelizeData, createServer, createSuccessRequestMock, defaultUser } from "./test-utils.ts";
+import { createMockAxiosResponse } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -32,18 +33,7 @@ beforeEach(async () => {
 });
 
 const insertUser = async () => {
-    return (await server.userProvider.userModelStatic.create({
-        gender: "male",
-        age: 30,
-        height: 173,
-        weight: 75,
-        bmi: "25.1",
-        calories: "2,813 kcal/day",
-        carbs: "316 - 457 grams",
-        fiber: "39 grams",
-        protein: "60 grams",
-        fat: "63 - 109 grams"
-    })).get({ plain: true });
+    return (await server.userProvider.userModelStatic.create(defaultUser)).get({ plain: true });
 };
 
 describe("FoodService.find method", () => {
@@ -68,78 +58,39 @@ describe("FoodService.find method", () => {
     });
 
     it("should return both common and branded food items", async () => {
-        // Setup mock responses for all API calls
-        const mockAxiosHeaders = new AxiosHeaders();
-        const mockConfig: InternalAxiosRequestConfig = {
-            headers: mockAxiosHeaders,
-            method: 'GET',
-            url: 'test-url',
-            transformRequest: [],
-            transformResponse: [],
-            timeout: 0,
-            adapter: 'xhr',
-            xsrfCookieName: 'XSRF-TOKEN',
-            xsrfHeaderName: 'X-XSRF-TOKEN',
-            maxContentLength: -1,
-            maxBodyLength: -1,
-            env: {
-                FormData: null as any
-            },
-            validateStatus: null
-        };
-
         // Mock response for initial search
-        const searchResponse: AxiosResponse = {
-            data: {
-                common: [{
-                    food_name: "apple",
-                    serving_unit: "medium"
-                }],
-                branded: [{
-                    nix_item_id: "123",
-                    food_name: "Apple Juice",
-                    serving_unit: "ml"
-                }]
-            },
-            status: 200,
-            statusText: "OK",
-            headers: mockAxiosHeaders,
-            config: mockConfig
-        };
+        const searchResponse = createMockAxiosResponse({
+            common: [{
+                food_name: "apple",
+                serving_unit: "medium"
+            }],
+            branded: [{
+                nix_item_id: "123",
+                food_name: "Apple Juice",
+                serving_unit: "ml"
+            }]
+        });
 
         // Mock response for common food details
-        const commonDetailsResponse: AxiosResponse = {
-            data: {
-                foods: [{
-                    food_name: "apple",
-                    nf_calories: 95,
-                    serving_unit: "medium"
-                }]
-            },
-            status: 200,
-            statusText: "OK",
-            headers: mockAxiosHeaders,
-            config: mockConfig
-        };
+        const commonDetailsResponse = createMockAxiosResponse({
+            foods: [{
+                food_name: "apple",
+                nf_calories: 95,
+                serving_unit: "medium"
+            }]
+        });
 
         // Mock response for branded food details
-        const brandedDetailsResponse: AxiosResponse = {
-            data: {
-                foods: [{
-                    food_name: "Apple Juice",
-                    nf_calories: 120,
-                    serving_unit: "ml"
-                }]
-            },
-            status: 200,
-            statusText: "OK",
-            headers: mockAxiosHeaders,
-            config: mockConfig
-        };
+        const brandedDetailsResponse = createMockAxiosResponse({
+            foods: [{
+                food_name: "Apple Juice",
+                nf_calories: 120,
+                serving_unit: "ml"
+            }]
+        });
 
         // Setup the request mock to return appropriate responses based on URL
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-        const requestMock = jest.fn<RequestFunction>().mockImplementation((config: AxiosRequestConfig) => {
+        const requestMock = createSuccessRequestMock((config: AxiosRequestConfig) => {
             if (config.url?.includes('search/instant')) {
                 return Promise.resolve(searchResponse);
             } else if (config.url?.includes('natural/nutrients')) {

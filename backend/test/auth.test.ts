@@ -3,7 +3,7 @@ import ApiError from "../src/error/api-error.ts";
 import Server from "../src/server.ts";
 import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
-import { createSequelizeData, createServer } from "./test-utils.ts";
+import { createSequelizeData, createServer, defaultUser } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -23,19 +23,7 @@ beforeEach(async () => {
 });
 
 const insertCredentials = async () => {
-    const user = (await server.userProvider.userModelStatic.create({
-        gender: "male",
-        age: 30,
-        height: 173,
-        weight: 75,
-
-        bmi: "25.1",
-        calories: "2,813 kcal/day",
-        carbs: "316 - 457 grams",
-        fiber: "39 grams",
-        protein: "60 grams",
-        fat: "63 - 109 grams"
-    })).get({ plain: true });
+    const user = (await server.userProvider.userModelStatic.create(defaultUser)).get({ plain: true });
     await server.authProvider.authModelStatic.create({
         username: "test",
         password: "$2a$10$NeJ2YiUNn88TDLlAELh9ZOg8BbGaSEiqxUWDOX/JTpPh7kFp..RrS", // hashed "test"

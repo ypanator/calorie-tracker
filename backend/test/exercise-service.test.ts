@@ -5,7 +5,8 @@ import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
 import { ExerciseApi } from "../src/types/exercise-type.ts";
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
-import { createSequelizeData, createServer } from "./test-utils.ts";
+import { createSuccessRequestMock, createSequelizeData, createServer, createFailureRequestMock, defaultUser } from "./test-utils.ts";
+import { createMockAxiosResponse } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -32,18 +33,7 @@ beforeEach(async () => {
 });
 
 const insertUser = async () => {
-    return (await server.userProvider.userModelStatic.create({
-        gender: "male",
-        age: 30,
-        height: 173,
-        weight: 85, // Different weight to test calorie calculations
-        bmi: "25.1",
-        calories: "2,813 kcal/day",
-        carbs: "316 - 457 grams",
-        fiber: "39 grams",
-        protein: "60 grams",
-        fat: "63 - 109 grams"
-    })).get({ plain: true });
+    return (await server.userProvider.userModelStatic.create(defaultUser)).get({ plain: true });
 };
 
 describe("ExerciseService.find method", () => {
@@ -81,42 +71,15 @@ beforeEach(() => {
     it("should return exercise data with user weight when user exists", async () => {
         const user = await insertUser();
 
-        // Mock axios response
-        const mockAxiosHeaders = new AxiosHeaders();
-        const mockConfig: InternalAxiosRequestConfig = {
-            headers: mockAxiosHeaders,
-            method: 'GET',
-            url: 'test-url',
-            transformRequest: [],
-            transformResponse: [],
-            timeout: 0,
-            adapter: 'xhr',
-            xsrfCookieName: 'XSRF-TOKEN',
-            xsrfHeaderName: 'X-XSRF-TOKEN',
-            maxContentLength: -1,
-            maxBodyLength: -1,
-            env: {
-                FormData: null as any
-            },
-            validateStatus: null
-        };
-
-        const mockResponse: AxiosResponse = {
-            data: [{
-                name: "running",
-                calories_per_hour: 600,
-                duration_minutes: 30,
-                total_calories: 300
-            }],
-            status: 200,
-            statusText: "OK",
-            headers: mockAxiosHeaders,
-            config: mockConfig
-        };
+        const mockResponse = createMockAxiosResponse([{
+            name: "running",
+            calories_per_hour: 600,
+            duration_minutes: 30,
+            total_calories: 300
+        }]);
 
         // Mock the API response
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-        const requestMock = jest.fn<RequestFunction>().mockResolvedValue(mockResponse);
+        const requestMock = createSuccessRequestMock(mockResponse);
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
         const result = await server.exerciseService.find(user.id!, "running", 30);
@@ -133,48 +96,21 @@ beforeEach(() => {
         // Verify the API was called with correct weight
         expect(requestMock).toHaveBeenCalledWith(expect.objectContaining({
             params: expect.objectContaining({
-                weight: "85"
+                weight: "75"
             })
         }));
     });
 
     it("should use default weight when user is not logged in", async () => {
-        // Mock axios response
-        const mockAxiosHeaders = new AxiosHeaders();
-        const mockConfig: InternalAxiosRequestConfig = {
-            headers: mockAxiosHeaders,
-            method: 'GET',
-            url: 'test-url',
-            transformRequest: [],
-            transformResponse: [],
-            timeout: 0,
-            adapter: 'xhr',
-            xsrfCookieName: 'XSRF-TOKEN',
-            xsrfHeaderName: 'X-XSRF-TOKEN',
-            maxContentLength: -1,
-            maxBodyLength: -1,
-            env: {
-                FormData: null as any
-            },
-            validateStatus: null
-        };
-
-        const mockResponse: AxiosResponse = {
-            data: [{
-                name: "running",
-                calories_per_hour: 600,
-                duration_minutes: 30,
-                total_calories: 300
-            }],
-            status: 200,
-            statusText: "OK",
-            headers: mockAxiosHeaders,
-            config: mockConfig
-        };
+        const mockResponse = createMockAxiosResponse([{
+            name: "running",
+            calories_per_hour: 600,
+            duration_minutes: 30,
+            total_calories: 300
+        }]);
 
         // Mock the API response
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-        const requestMock = jest.fn<RequestFunction>().mockResolvedValue(mockResponse);
+        const requestMock = createSuccessRequestMock(mockResponse);
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
         const result = await server.exerciseService.find(null, "running", 30);
@@ -193,8 +129,7 @@ beforeEach(() => {
 const user = await insertUser();
 
         // Mock API failure
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-        const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
+        const requestMock = createFailureRequestMock(new Error("API Error"));
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
         await expect(server.exerciseService.find(user.id!, "running", 30))

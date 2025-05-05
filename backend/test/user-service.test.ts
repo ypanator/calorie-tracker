@@ -5,7 +5,8 @@ import { SequelizeData } from "../src/db/db.ts";
 import { UserAttributes } from "../src/types/user-type.ts";
 import { jest } from '@jest/globals';
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
-import { createSequelizeData, createServer } from "./test-utils.ts";
+import { createFailureRequestMock, createSequelizeData, createServer, createSuccessRequestMock, defaultUser } from "./test-utils.ts";
+import { createMockAxiosResponse } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -32,18 +33,7 @@ beforeEach(async () => {
 });
 
 const insertUser = async () => {
-    return (await server.userProvider.userModelStatic.create({
-        gender: "male",
-        age: 30,
-        height: 173,
-        weight: 75,
-        bmi: "25.1",
-        calories: "2,813 kcal/day",
-        carbs: "316 - 457 grams",
-        fiber: "39 grams",
-        protein: "60 grams",
-        fat: "63 - 109 grams"
-    })).get({ plain: true });
+    return (await server.userProvider.userModelStatic.create(defaultUser)).get({ plain: true });
 };
 
 describe("UserService.updateUserAttributes method", () => {
@@ -84,51 +74,24 @@ describe("UserService.updateUserAttributes method", () => {
             weight: 77
         };
 
-        // Mock the axios request with proper typing
-        const mockAxiosHeaders = new AxiosHeaders();
-        const mockConfig: InternalAxiosRequestConfig = {
-            headers: mockAxiosHeaders,
-            method: 'GET',
-            url: 'test-url',
-            transformRequest: [],
-            transformResponse: [],
-            timeout: 0,
-            adapter: 'xhr',
-            xsrfCookieName: 'XSRF-TOKEN',
-            xsrfHeaderName: 'X-XSRF-TOKEN',
-            maxContentLength: -1,
-            maxBodyLength: -1,
-            env: {
-                FormData: null as any
+        const mockResponse = createMockAxiosResponse({
+            BMI_EER: {
+                BMI: "25.5",
+                "Estimated Daily Caloric Needs": "2,900 kcal/day"
             },
-            validateStatus: null
-        };
+            macronutrients_table: {
+                "macronutrients-table": [
+                    ["header1", "value1"],
+                    ["Carbs", "320 - 460 grams"],
+                    ["Fiber", "40 grams"],
+                    ["Protein", "65 grams"],
+                    ["Fat", "65 - 110 grams"]
+                ]
+            }
+        });
 
-        const mockResponse: AxiosResponse = {
-            data: {
-                BMI_EER: {
-                    BMI: "25.5",
-                    "Estimated Daily Caloric Needs": "2,900 kcal/day"
-                },
-                macronutrients_table: {
-                    "macronutrients-table": [
-                        ["header1", "value1"],
-                        ["Carbs", "320 - 460 grams"],
-                        ["Fiber", "40 grams"],
-                        ["Protein", "65 grams"],
-                        ["Fat", "65 - 110 grams"]
-                    ]
-                }
-            },
-            status: 200,
-            statusText: "OK",
-            headers: mockAxiosHeaders,
-            config: mockConfig
-        };
-
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-        const requestMock = jest.fn<RequestFunction>().mockResolvedValue(mockResponse);
-                server.userService.userAxios.request = requestMock as any;
+        const requestMock = createSuccessRequestMock(mockResponse);
+        server.userService.userAxios.request = requestMock as any;
 
         const result = await server.userService.updateUserAttributes(user.id!, newAttributes);
         
@@ -158,9 +121,8 @@ describe("UserService.updateUserAttributes method", () => {
         };
 
         // Mock API failure with proper typing
-        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
-        const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
-                server.userService.userAxios.request = requestMock as any;
+        const requestMock = createFailureRequestMock(new Error("API Error"));
+        server.userService.userAxios.request = requestMock as any;
 
         await expect(server.userService.updateUserAttributes(user.id!, newAttributes))
             .rejects.toMatchObject({
