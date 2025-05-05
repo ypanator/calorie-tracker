@@ -4,6 +4,7 @@ import Server from "../src/server.ts";
 import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
+import { createSequelizeData, createServer } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -12,20 +13,8 @@ let originalEnv: NodeJS.ProcessEnv;
 beforeAll(async () => {
     // Save original env
     originalEnv = process.env;
-    
-    class SequelizeData extends Sequelize {
-        constructor() {
-            super({
-                dialect: "sqlite",
-                storage: "./test/db/data.sqlite",
-                logging: false
-            });
-        }
-    }
-
-    sequelizeData = new SequelizeData();
-    server = new Server();
-    await server.init({ sequelizeData });
+    sequelizeData = createSequelizeData();
+    server = await createServer(sequelizeData);
 });
 
 afterAll(async () => {
@@ -61,25 +50,21 @@ describe("FoodService.find method", () => {
     it("should throw error when API key is missing", async () => {
         process.env.food_api_key = '';
         
-        try {
-            await server.foodService.find("apple", 1);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("Searching for foods is not available.");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.foodService.find("apple", 1))
+            .rejects.toMatchObject({
+                msg: "Searching for foods is not available.",
+                code: 500
+            });
     });
 
     it("should throw error when API ID is missing", async () => {
         process.env.food_api_id = '';
         
-        try {
-            await server.foodService.find("apple", 1);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("Searching for foods is not available.");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.foodService.find("apple", 1))
+            .rejects.toMatchObject({
+                msg: "Searching for foods is not available.",
+                code: 500
+            });
     });
 
     it("should return both common and branded food items", async () => {
@@ -193,13 +178,11 @@ describe("FoodService.find method", () => {
         const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
         server.foodProvider.foodAxios.request = requestMock as any;
 
-        try {
-            await server.foodService.find("apple", 1);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("Searching for foods is not available.");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.foodService.find("apple", 1))
+            .rejects.toMatchObject({
+                msg: "Searching for foods is not available.",
+                code: 500
+            });
     });
 });
 

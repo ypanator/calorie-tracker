@@ -5,6 +5,7 @@ import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
 import { ExerciseApi } from "../src/types/exercise-type.ts";
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
+import { createSequelizeData, createServer } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -13,20 +14,8 @@ let originalEnv: NodeJS.ProcessEnv;
 beforeAll(async () => {
     // Save original env and set API keys
     originalEnv = process.env;
-    
-    class SequelizeData extends Sequelize {
-        constructor() {
-            super({
-                dialect: "sqlite",
-                storage: "./test/db/data.sqlite",
-                logging: false
-            });
-        }
-    }
-
-    sequelizeData = new SequelizeData();
-    server = new Server();
-    await server.init({ sequelizeData });
+    sequelizeData = createSequelizeData();
+    server = await createServer(sequelizeData);
 });
 
 afterAll(async () => {
@@ -58,6 +47,11 @@ const insertUser = async () => {
 };
 
 describe("ExerciseService.find method", () => {
+beforeEach(() => {
+        // Reset API key before each test
+        process.env.exercise_api_key = 'test-key';
+    });
+
     beforeEach(() => {
         // Reset API key before each test
         process.env.exercise_api_key = 'test-key';
@@ -65,15 +59,23 @@ describe("ExerciseService.find method", () => {
 
     it("should throw error when API key is missing", async () => {
         process.env.exercise_api_key = '';
-        const user = await insertUser();
+        
 
-        try {
-            await server.exerciseService.find(user.id!, "running", 30);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("Searching for exercises is not available.");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.exerciseService.find(null, "running", 30))
+            .rejects.toMatchObject({
+                msg: "Searching for exercises is not available.",
+                code: 500
+            });
+    });
+
+    it("should throw error when API ID is missing", async () => {
+        process.env.exercise_api_id = '';
+        
+        await expect(server.exerciseService.find(null, "running", 30))
+            .rejects.toMatchObject({
+                msg: "Searching for exercises is not available.",
+                code: 500
+            });
     });
 
     it("should return exercise data with user weight when user exists", async () => {
@@ -188,20 +190,18 @@ describe("ExerciseService.find method", () => {
     });
 
     it("should throw error when API call fails", async () => {
-        const user = await insertUser();
+const user = await insertUser();
 
         // Mock API failure
-type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+        type RequestFunction = <T = any>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
         const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
-        try {
-            await server.exerciseService.find(user.id!, "running", 30);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("Searching for exercises is not available.");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.exerciseService.find(user.id!, "running", 30))
+            .rejects.toMatchObject({
+                msg: "Searching for exercises is not available.",
+                code: 500
+            });
     });
 });
 

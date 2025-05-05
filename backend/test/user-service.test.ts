@@ -5,6 +5,7 @@ import { SequelizeData } from "../src/db/db.ts";
 import { UserAttributes } from "../src/types/user-type.ts";
 import { jest } from '@jest/globals';
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
+import { createSequelizeData, createServer } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
 let server: Server;
@@ -13,20 +14,8 @@ let originalEnv: NodeJS.ProcessEnv;
 beforeAll(async () => {
     // Save original env
     originalEnv = process.env;
-    
-    class SequelizeData extends Sequelize {
-        constructor() {
-            super({
-                dialect: "sqlite",
-                storage: "./test/db/data.sqlite",
-                logging: false
-            });
-        }
-    }
-
-    sequelizeData = new SequelizeData();
-    server = new Server();
-    await server.init({ sequelizeData });
+    sequelizeData = createSequelizeData();
+    server = await createServer(sequelizeData);
 });
 
 afterAll(async () => {
@@ -79,13 +68,11 @@ describe("UserService.updateUserAttributes method", () => {
             weight: 77
         };
 
-        try {
-            await server.userService.updateUserAttributes(user.id!, newAttributes);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("User statistics could not be updated. Please try again later");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.userService.updateUserAttributes(user.id!, newAttributes))
+            .rejects.toMatchObject({
+                msg: "User statistics could not be updated. Please try again later",
+                code: 500
+            });
     });
 
     it("should update user attributes and stats in transaction", async () => {
@@ -175,13 +162,11 @@ describe("UserService.updateUserAttributes method", () => {
         const requestMock = jest.fn<RequestFunction>().mockRejectedValue(new Error("API Error"));
                 server.userService.userAxios.request = requestMock as any;
 
-        try {
-            await server.userService.updateUserAttributes(user.id!, newAttributes);
-        } catch (error) {
-            expect(error).toBeInstanceOf(ApiError);
-            expect((error as ApiError).msg).toBe("User statistics could not be updated. Please try again later");
-            expect((error as ApiError).code).toBe(500);
-        }
+        await expect(server.userService.updateUserAttributes(user.id!, newAttributes))
+            .rejects.toMatchObject({
+                msg: "User statistics could not be updated. Please try again later",
+                code: 500
+            });
 
         // Verify no changes were made
         const unchangedUser = await server.userService.getUser(user.id!);
