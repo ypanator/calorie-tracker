@@ -5,13 +5,12 @@ import { AxiosHeaders, AxiosRequestConfig, AxiosResponse } from "axios";
 import { jest } from '@jest/globals';
 import { User } from "../src/types/user-type.ts";
 
-export const createSequelizeData = (): SequelizeData => {
-    return new Sequelize({
+export const createSequelizeData = (): SequelizeData => 
+    new Sequelize({
         dialect: "sqlite",
         storage: ":memory:",
         logging: false
     });
-};
 
 export const createServer = async (sequelizeData?: SequelizeData): Promise<Server> => {
     const server = new Server();
@@ -33,34 +32,9 @@ export const createMockAxiosResponse = <T>(data: T): AxiosResponse<T> => ({
 
 export type RequestFunction = (config: AxiosRequestConfig) =>
     Promise<AxiosResponse<any>>;
-
-// 1) Overload signature: when passed a RequestFunction,  
-//    return a mock that uses mockImplementation(...)
-export function createSuccessRequestMock(
-    impl: RequestFunction
-): jest.MockedFunction<RequestFunction>;
   
-// 2) Overload signature: when passed an AxiosResponse,  
-//    return a mock that always resolves with that response
-export function createSuccessRequestMock(
-    response: AxiosResponse<any>
-): jest.MockedFunction<RequestFunction>;
-  
-// 3) Implementation: decide at runtime which you got
-export function createSuccessRequestMock(arg: any) {
-    const mock = jest.fn<RequestFunction>();
-  
-    if (typeof arg === "function") {
-        mock.mockImplementation(arg);
-    } else {
-        mock.mockResolvedValue(arg);
-    }
-  
-    return mock as jest.MockedFunction<RequestFunction>;
-}
-
-export const createFailureRequestMock = (mockResponse: any) => 
-    jest.fn<RequestFunction>().mockRejectedValue(mockResponse);
+export const createRequestMock = (func: RequestFunction) =>
+    jest.fn<RequestFunction>().mockImplementation(func);
 
 export const defaultUser: User = {
     gender: "male",

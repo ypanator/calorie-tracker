@@ -4,7 +4,7 @@ import Server from "../src/server.ts";
 import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
-import { createSequelizeData, createServer, createSuccessRequestMock, defaultUser } from "./test-utils.ts";
+import { createSequelizeData, createServer, createRequestMock, defaultUser } from "./test-utils.ts";
 import { createMockAxiosResponse } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
@@ -90,7 +90,7 @@ describe("FoodService.find method", () => {
         });
 
         // Setup the request mock to return appropriate responses based on URL
-        const requestMock = createSuccessRequestMock((config: AxiosRequestConfig) => {
+        const requestMock = createRequestMock((config: AxiosRequestConfig) => {
             if (config.url?.includes('search/instant')) {
                 return Promise.resolve(searchResponse);
             } else if (config.url?.includes('natural/nutrients')) {

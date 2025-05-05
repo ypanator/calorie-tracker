@@ -5,7 +5,7 @@ import { SequelizeData } from "../src/db/db.ts";
 import { UserAttributes } from "../src/types/user-type.ts";
 import { jest } from '@jest/globals';
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
-import { createFailureRequestMock, createSequelizeData, createServer, createSuccessRequestMock, defaultUser } from "./test-utils.ts";
+import { createSequelizeData, createServer, createRequestMock, defaultUser } from "./test-utils.ts";
 import { createMockAxiosResponse } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
@@ -90,7 +90,7 @@ describe("UserService.updateUserAttributes method", () => {
             }
         });
 
-        const requestMock = createSuccessRequestMock(mockResponse);
+        const requestMock = createRequestMock((config) => Promise.resolve(mockResponse));
         server.userService.userAxios.request = requestMock as any;
 
         const result = await server.userService.updateUserAttributes(user.id!, newAttributes);
@@ -121,7 +121,7 @@ describe("UserService.updateUserAttributes method", () => {
         };
 
         // Mock API failure with proper typing
-        const requestMock = createFailureRequestMock(new Error("API Error"));
+        const requestMock = createRequestMock((config) => Promise.reject(new Error("API Error")));
         server.userService.userAxios.request = requestMock as any;
 
         await expect(server.userService.updateUserAttributes(user.id!, newAttributes))

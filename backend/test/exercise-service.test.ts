@@ -5,7 +5,7 @@ import { SequelizeData } from "../src/db/db.ts";
 import { jest } from '@jest/globals';
 import { ExerciseApi } from "../src/types/exercise-type.ts";
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
-import { createSuccessRequestMock, createSequelizeData, createServer, createFailureRequestMock, defaultUser } from "./test-utils.ts";
+import { createRequestMock, createSequelizeData, createServer, defaultUser } from "./test-utils.ts";
 import { createMockAxiosResponse } from "./test-utils.ts";
 
 let sequelizeData: SequelizeData;
@@ -79,7 +79,7 @@ beforeEach(() => {
         }]);
 
         // Mock the API response
-        const requestMock = createSuccessRequestMock(mockResponse);
+        const requestMock = createRequestMock((config) => Promise.resolve(mockResponse));
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
         const result = await server.exerciseService.find(user.id!, "running", 30);
@@ -110,7 +110,7 @@ beforeEach(() => {
         }]);
 
         // Mock the API response
-        const requestMock = createSuccessRequestMock(mockResponse);
+        const requestMock = createRequestMock((config) => Promise.resolve(mockResponse));
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
         const result = await server.exerciseService.find(null, "running", 30);
@@ -129,7 +129,7 @@ beforeEach(() => {
 const user = await insertUser();
 
         // Mock API failure
-        const requestMock = createFailureRequestMock(new Error("API Error"));
+        const requestMock = createRequestMock((config) => Promise.reject(new Error("API Error")));
         server.exerciseProvider.exerciseAxios.request = requestMock as any;
 
         await expect(server.exerciseService.find(user.id!, "running", 30))
