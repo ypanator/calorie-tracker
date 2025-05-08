@@ -1,1 +1,1 @@
-export default function ExerecisePage(props) {return <></>}
+export default function ExerecisePage() {return <>Exercise page</>}

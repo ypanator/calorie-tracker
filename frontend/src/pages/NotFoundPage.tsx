@@ -1,3 +1,3 @@
-export default function NotFoundPage(props) {
+export default function NotFoundPage() {
     return <div>Page Not Found</div>;
 }

@@ -11,8 +11,8 @@ interface TextFieldProps {
 export default function TextField({ label, errorMsg, isError, value, onChange }: TextFieldProps) {
   return (
     <FormControl isInvalid={isError} isRequired>
-      <FormLabel>{label}</FormLabel>
-      <Input type="text" value={value} onChange={onChange} />
+      <FormLabel htmlFor={label}>{label}</FormLabel>
+        <Input id={label} type="text" value={value} onChange={onChange} />
       <FormErrorMessage>{errorMsg}</FormErrorMessage>
     </FormControl>
   );

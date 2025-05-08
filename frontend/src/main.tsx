@@ -7,11 +7,11 @@ import theme from './theme.ts'
 import { BrowserRouter as Router } from 'react-router-dom'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ChakraProvider theme={theme}>
-      <Router>
-        <App />
-      </Router>
-    </ChakraProvider>
-  </StrictMode>,
+    <StrictMode>
+        <ChakraProvider theme={theme}>
+            <Router>
+                <App />
+            </Router>
+        </ChakraProvider>
+    </StrictMode>
 )

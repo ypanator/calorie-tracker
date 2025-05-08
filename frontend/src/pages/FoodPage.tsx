@@ -1,1 +1,1 @@
-export default function FoodPage(props) {return <></>}
+export default function FoodPage() {return <>Food page</>}

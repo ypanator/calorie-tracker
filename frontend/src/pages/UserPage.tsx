@@ -1,1 +1,1 @@
-export default function UserPage(props) {return <></>}
+export default function UserPage() {return <>User Page</>}
