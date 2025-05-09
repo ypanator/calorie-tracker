@@ -1,6 +1,8 @@
 import { Button, Center, HStack, VStack } from "@chakra-ui/react";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
+import { useToastHelper } from "../hooks/useToastHelper.tsx";
+import axios from "axios";
 
 const MIN_SPINNER_MS = 1000;
 
@@ -12,6 +14,8 @@ export default function AuthPage() {
     let [ passwordValid, setPasswordValid ] = useState(true);
 
     const [formState, setFormState] = useState<"idle" | "login" | "register">("idle");
+
+    const { successToast } = useToastHelper();
 
     const isValid = (str: string): boolean => {
         str = str.replace(/[^a-zA-Z\s]/g, '');
@@ -44,26 +48,24 @@ export default function AuthPage() {
         setPasswordValid(isValid(nextPassword));
     };
 
-    const handleRegister = async () => {
+    const handleAuth = async (action: "register" | "login") => {
         if (!validateData()) { return; }
+        setFormState(action);
 
-        setFormState("register");
-        
-        const workPromise = Promise.resolve();
+        let workPromise;
+        if (action === "register") {
+            workPromise = axios.post("http://localhost:3000/auth/register", { username, password });
+        } else {
+            workPromise = axios.post("http://localhost:3000/auth/login", { username, password });
+        }
         await withMinDelay(workPromise);
 
         setFormState("idle");
-    };
-
-    const handleLogin = async () => {
-        if (!validateData()) { return; }
-
-        setFormState("login");
-        
-        const workPromise = Promise.resolve();
-        await withMinDelay(workPromise);
-        
-        setFormState("idle");
+        if (action === "register") {
+           successToast("Successfuly registered! Please login.");
+        } else {
+            successToast("Successfuly logged in!");
+        }
     };
 
     return (
@@ -76,8 +78,16 @@ export default function AuthPage() {
             label="password" errorMsg="Cannot be empty." isError={!passwordValid}
             value={password} onChange={(e) => handlePasswordChange(e.target.value)}/>
         <HStack>
-            <Button onClick={handleLogin} isDisabled={formState === "register"} isLoading={formState === "login"}>Login</Button>
-            <Button onClick={handleRegister} isDisabled={formState === "login"} isLoading={formState === "register"}>Register</Button>
+            <Button 
+                onClick={() => handleAuth("login")} 
+                isDisabled={formState === "register"} 
+                isLoading={formState === "login"}
+            >Login</Button>
+            <Button 
+                onClick={() => handleAuth("register")} 
+                isDisabled={formState === "login"} 
+                isLoading={formState === "register"}
+            >Register</Button>
         </HStack>
     </VStack>
     </Center>
