@@ -1,33 +1,33 @@
-import { extendTheme } from "@chakra-ui/react"
+import { extendTheme } from "@chakra-ui/react";
 
 export default extendTheme({
-    styles: {
-        global: {
-            body: {
-                bg: "gray.900",
-                color: "whiteAlpha.900",
-            },
+  styles: {
+    global: {
+      body: {
+        bg: "gray.800", // brighter than 900
+        color: "whiteAlpha.900",
+      },
+    },
+  },
+  colors: {
+    brand: {
+      50: "#f7fafc",
+      900: "#2d3748",
+    },
+  },
+  components: {
+    Button: {
+      baseStyle: {
+        color: "white",
+        bg: "gray.600",
+        _hover: {
+          bg: "gray.500",
         },
+      },
     },
-    colors: {
-        brand: {
-            50: "#ffffff",
-            900: "#1a202c",
-        },
-    },
-    components: {
-        Button: {
-            baseStyle: {
-                color: "white",
-                bg: "gray.700",
-                _hover: {
-                    bg: "gray.600",
-                },
-            },
-        },
-    },
-    config: {
-        initialColorMode: "dark",
-        useSystemColorMode: false,
-    },
+  },
+  config: {
+    initialColorMode: "dark",
+    useSystemColorMode: false,
+  },
 });

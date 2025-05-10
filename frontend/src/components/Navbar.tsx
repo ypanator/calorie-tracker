@@ -10,28 +10,28 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
     return (
     <MotionVStack
-        height="100%" zIndex={10}
+        height="100vh" zIndex={10}
         initial={false} 
-        animate={{ width: collapsed ? "60px" : "250px" }}
+        animate={{ width: collapsed ? "60px" : "220px" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
         spacing={4}
         p={4}
-        align="flex-start"
+        align="center"
         justify="flex-start"
-        shadow="md"
+        shadow="dark-lg"
+        boxShadow="0 0 30px 2px rgba(0, 0, 0, 0.9)"
         overflow="hidden"
+        whiteSpace="nowrap"
     >
         <IconButton
             icon={collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             onClick={() => setCollapsed(!collapsed)}
             aria-label="Toggle navbar"
             size="sm"
-            position="absolute"
-            top={4}
-            left={4}
+            alignSelf="flex-start"
             zIndex={1}
         />
-        {!collapsed && children}
+            {!collapsed && children}
     </MotionVStack>
     );
 }

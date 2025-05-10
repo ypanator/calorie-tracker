@@ -1,5 +1,7 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navbar from './components/Navbar';
+import NavbarLink from "./components/NavbarLink.tsx";
+import { Box, HStack } from "@chakra-ui/react";
 
 import HomePage from './pages/HomePage';
 import ExercisePage from './pages/ExercisePage';
@@ -8,7 +10,6 @@ import UserPage from './pages/UserPage';
 import AuthPage from './pages/AuthPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-import { Box, HStack } from "@chakra-ui/react";
 import { CgGym } from "react-icons/cg";
 import { FaHome } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
@@ -18,15 +19,15 @@ import { FaLock } from "react-icons/fa";
 
 export default function App() {
     return (
-    <HStack spacing={0} minHeight="100vh" minWidth="100vw" align="flex-start" justify="flex-start">
+    <HStack spacing={0} minHeight="100vh" minWidth="100vw" align="stretch" justify="flex-start">
         <Navbar>
-            <FaHome /><Link      to="/"          >Home</Link>
-            <CgGym /><Link       to="/exercise"  >Exercises</Link>
-            <MdFastfood /><Link  to="/food"      >Foods</Link>
-            <FaUser /><Link      to="/user"      >Profile</Link>
-            <FaLock /><Link      to="/auth"      >Log in</Link>
+            <NavbarLink Icon={FaHome}      to="/"          text="Home" />
+            <NavbarLink Icon={CgGym}      to="/exercise"  text="Exercises" />
+            <NavbarLink Icon={MdFastfood} to="/food"      text="Foods" />
+            <NavbarLink Icon={FaUser}     to="/user"      text="Profile" />
+            <NavbarLink Icon={FaLock}     to="/auth"      text="Log in" />
         </Navbar>
-        <Box as="main" flex="1">
+        <Box as="main" flex="1" minHeight="100vh">
         <Routes>
             <Route path="/"          element={<HomePage />} />
             <Route path="/exercise"  element={<ExercisePage />} />

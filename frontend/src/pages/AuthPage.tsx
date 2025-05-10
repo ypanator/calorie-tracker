@@ -77,7 +77,7 @@ export default function AuthPage() {
         <TextField 
             label="password" errorMsg="Cannot be empty." isError={!passwordValid}
             value={password} onChange={(e) => handlePasswordChange(e.target.value)}/>
-        <HStack>
+        <HStack padding={4} spacing={5}>
             <Button 
                 onClick={() => handleAuth("login")} 
                 isDisabled={formState === "register"} 
