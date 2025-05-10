@@ -4,6 +4,8 @@ import { Express } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 
+import cors from "cors"
+
 import { SequelizeData } from "./db/db.js";
 import dotenv from "dotenv";
 
@@ -40,6 +42,12 @@ export default class Server {
   
     async init(dependencies?: { sequelizeData?: SequelizeData }) {
       this.app = express();
+
+      this.app.use(cors({
+        origin: "http://localhost:5173",
+        credentials: true
+      }));
+
       dotenv.config({ path: "./keys.env" });
     
       const session_key: string = process.env.session_key || "";

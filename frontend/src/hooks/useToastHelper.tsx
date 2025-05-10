@@ -10,6 +10,7 @@ export const useToastHelper = () => {
       status: "success",
       duration: 5000,
       isClosable: true,
+      position: "bottom-right"
     });
   };
 
@@ -20,6 +21,7 @@ export const useToastHelper = () => {
       status: "error",
       duration: 5000,
       isClosable: true,
+      position: "bottom-right"
     });
   };
 
@@ -30,6 +32,7 @@ export const useToastHelper = () => {
       status: "info",
       duration: 5000,
       isClosable: true,
+      position: "bottom-right"
     });
   };
 

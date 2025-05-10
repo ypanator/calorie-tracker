@@ -29,3 +29,6 @@ dist-ssr
 
 # jest coverage result file
 coverage
+
+# sql
+*.sqlite

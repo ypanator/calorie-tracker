@@ -2,7 +2,7 @@ import { Button, Center, HStack, VStack } from "@chakra-ui/react";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
-import axios from "axios";
+import axiosInstance from "../axios-instance.ts";
 
 const MIN_SPINNER_MS = 1000;
 
@@ -15,58 +15,76 @@ export default function AuthPage() {
 
     const [formState, setFormState] = useState<"idle" | "login" | "register">("idle");
 
-    const { successToast } = useToastHelper();
+    const { successToast, errorToast } = useToastHelper();
 
-    const isValid = (str: string): boolean => {
-        str = str.replace(/[^a-zA-Z\s]/g, '');
+    const isValid = (str: string, type: "username" | "password"): boolean => {
+        if (type === "username") {
+            str = str.replace(/[^a-zA-Z0-9\s]/g, '');
+        }
         return str.length > 0;
     }
 
     const validateData = (): boolean => {
-        const userOK = isValid(username);
-        const passOK = isValid(password);
+        const usernameOK = isValid(username, "username");
+        const passwordOK = isValid(password, "password");
 
-        setUsernameValid(userOK);
-        setPasswordValid(passOK);
+        setUsernameValid(usernameOK);
+        setPasswordValid(passwordOK);
 
-        return userOK && passOK;
+        return usernameOK && passwordOK;
     }
 
     const withMinDelay = async <T,>(work: Promise<T>): Promise<T> => {
         const delay = new Promise((r) => setTimeout(r, MIN_SPINNER_MS));
-        const result = await Promise.all([work, delay]);
-        return result[0] as T;
+            const result = await Promise.allSettled([work, delay]);
+            const workResult = result[0];
+
+            if (workResult.status === "fulfilled") {
+                return workResult.value as T;
+            } else {
+                throw new TypeError(`Could not connect to the server: ${workResult.reason}.`);
+            };
     }
 
     const handleUsernameChange = (nextUsername: string) => {
         setUsername(nextUsername);
-        setUsernameValid(isValid(nextUsername));
+        setUsernameValid(isValid(nextUsername, "username"));
     };
 
     const handlePasswordChange = (nextPassword: string) => {
         setPassword(nextPassword);
-        setPasswordValid(isValid(nextPassword));
+        setPasswordValid(isValid(nextPassword, "password"));
     };
 
     const handleAuth = async (action: "register" | "login") => {
-        if (!validateData()) { return; }
+        if (!validateData()) return;
+      
         setFormState(action);
-
-        let workPromise;
-        if (action === "register") {
-            workPromise = axios.post("http://localhost:3000/auth/register", { username, password });
-        } else {
-            workPromise = axios.post("http://localhost:3000/auth/login", { username, password });
+        const endpoint = `/auth/${action}`;
+        const payload = { username, password };
+      
+        try {
+          const result = await withMinDelay(axiosInstance.post(endpoint, payload));
+      
+          if (result.status >= 400) {
+            const msg = result.data.msg ?? result.data;
+            errorToast(msg);
+            console.error(msg);
+          } else {
+            const successMsg =
+              action === "register"
+                ? "Successfully registered! Please login."
+                : "Successfully logged in!";
+            successToast(successMsg);
+          }
+        } catch (err) {
+          errorToast("Could not connect to server. Please try again later.");
+          console.error(err);
+        } finally {
+          setFormState("idle");
         }
-        await withMinDelay(workPromise);
-
-        setFormState("idle");
-        if (action === "register") {
-           successToast("Successfuly registered! Please login.");
-        } else {
-            successToast("Successfuly logged in!");
-        }
-    };
+      };
+      
 
     return (
     <Center minWidth="100%" minHeight="100vh">
