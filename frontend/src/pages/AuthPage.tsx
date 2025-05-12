@@ -3,8 +3,8 @@ import TextField from "../components/TextField.tsx";
 import { useState } from "react";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
 import axiosInstance from "../axios-instance.ts";
+import { WorkWithMinDelay } from "../utils.tsx";
 
-const MIN_SPINNER_MS = 1000;
 
 export default function AuthPage() {
     let [ username, setUsername ] = useState("");
@@ -34,18 +34,6 @@ export default function AuthPage() {
         return usernameOK && passwordOK;
     }
 
-    const withMinDelay = async <T,>(work: Promise<T>): Promise<T> => {
-        const delay = new Promise((r) => setTimeout(r, MIN_SPINNER_MS));
-            const result = await Promise.allSettled([work, delay]);
-            const workResult = result[0];
-
-            if (workResult.status === "fulfilled") {
-                return workResult.value as T;
-            } else {
-                throw new TypeError(`Could not connect to the server: ${workResult.reason}.`);
-            };
-    }
-
     const handleUsernameChange = (nextUsername: string) => {
         setUsername(nextUsername);
         setUsernameValid(isValid(nextUsername, "username"));
@@ -64,7 +52,7 @@ export default function AuthPage() {
         const payload = { username, password };
       
         try {
-          const result = await withMinDelay(axiosInstance.post(endpoint, payload));
+          const result = await WorkWithMinDelay(axiosInstance.post(endpoint, payload));
       
           if (result.status >= 400) {
             const msg = result.data.msg ?? result.data;
@@ -85,7 +73,6 @@ export default function AuthPage() {
         }
       };
       
-
     return (
     <Center minWidth="100%" minHeight="100vh">
     <VStack>
