@@ -40,18 +40,15 @@ export default function AddItemForm({ title, labels, onSubmit }: AddItemFormProp
     }
     
     const handleSubmit = async () => {
-        setFormState("submitting");
         const input: Record<string, string> = {};
 
         for (const entry of Object.entries(values)) {
             const [key, value] = entry;
-            if (value.isError) {
-                setFormState("idle");
-                return;
-            }
+            if (value.isError) { return; }
             input[key] = value.value;
         }
-        
+
+        setFormState("submitting");
         await onSubmit(input);
         setFormState("idle");
     }
