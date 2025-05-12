@@ -8,7 +8,7 @@ import { IconContext } from 'react-icons'
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-    <IconContext.Provider value={{ color: "white", style: { display: "inline" } }}>
+    <IconContext.Provider value={{ color: "white", size: "25", style: { display: "inline" } }}>
     <ChakraProvider theme={theme}>
     <Router>
         <App />

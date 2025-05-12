@@ -12,9 +12,9 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     <MotionVStack
         height="100vh" zIndex={10}
         initial={false} 
-        animate={{ width: collapsed ? "60px" : "220px" }}
+        animate={{ width: collapsed ? "70px" : "220px" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        spacing={4}
+        spacing={5}
         p={4}
         align="center"
         justify="flex-start"
@@ -24,10 +24,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         whiteSpace="nowrap"
     >
         <IconButton
-            icon={collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            icon={collapsed ? <ChevronRightIcon boxSize={25} /> : <ChevronLeftIcon boxSize={25}/>}
             onClick={() => setCollapsed(!collapsed)}
             aria-label="Toggle navbar"
-            size="sm"
+            size="md"
             alignSelf="flex-start"
             zIndex={1}
         />

@@ -75,18 +75,30 @@ export default function AuthPage() {
       
     return (
     <Center minWidth="100%" minHeight="100vh">
-    <VStack>
+    <VStack
+        borderWidth={2} 
+        borderRadius="md" 
+        boxShadow="dark-lg"
+        padding={10}
+        px={20}
+      >
+        <HStack align="flex-start" minH="100px">
         <TextField 
             label="username" errorMsg="Cannot be empty." isError={!usernameValid}
             value={username} onChange={(e) => handleUsernameChange(e.target.value)}/>
+          </HStack>
+        <HStack align="flex-start" minH="100px">
         <TextField 
             label="password" errorMsg="Cannot be empty." isError={!passwordValid}
-            value={password} onChange={(e) => handlePasswordChange(e.target.value)}/>
-        <HStack padding={4} spacing={5}>
+            value={password} onChange={(e) => handlePasswordChange(e.target.value)}
+            type="password" />
+        </HStack>
+        <HStack padding={2} pt={4} spacing={8}>
             <Button 
                 onClick={() => handleAuth("login")} 
                 isDisabled={formState === "register"} 
                 isLoading={formState === "login"}
+                minW="90px"
             >Login</Button>
             <Button 
                 onClick={() => handleAuth("register")} 

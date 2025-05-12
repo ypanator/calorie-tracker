@@ -13,7 +13,7 @@ type TextFieldState = {
     isError: boolean;
 }
 
-export default function AddItemForm({ title, labels, onSubmit }: AddItemFormProps) {
+export default function AddItemForm({ title, labels, onSubmit, ...other }: AddItemFormProps & React.ComponentProps<typeof VStack>) {
 
     const [ values, setValues ] = useState<Record<string, TextFieldState>>(() =>
         Object.fromEntries(
@@ -54,9 +54,19 @@ export default function AddItemForm({ title, labels, onSubmit }: AddItemFormProp
     }
 
     return (
-    <VStack spacing={4} align="stretch" width="max-content">
-        <Text>{title}</Text>
-        <HStack spacing={4} justify="space-evenly">
+    <VStack 
+        spacing={5} 
+        align="stretch" 
+        width="max-content" 
+        margin={6} 
+        padding={6} 
+        borderWidth={2} 
+        borderRadius="md" 
+        boxShadow="dark-lg"
+        {...other}
+    >
+        <Text as="b" fontSize="25px">{title}</Text>
+        <HStack spacing={7} justify="space-evenly" align="flex-start">
             {labels.map((label) => (
                 <TextField
                     key={label}
@@ -69,7 +79,10 @@ export default function AddItemForm({ title, labels, onSubmit }: AddItemFormProp
             ))}
             <Button 
                 onClick={() => handleSubmit()}
-                isLoading={formState === "submitting"}    
+                isLoading={formState === "submitting"}
+                padding={5}
+                px={6}
+                mt={8}
             >Add</Button>
         </HStack>
     </VStack>

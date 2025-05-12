@@ -8,11 +8,11 @@ interface TextFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function TextField({ label, errorMsg, isError, value, onChange }: TextFieldProps) {
+export default function TextField({ label, errorMsg, isError, value, onChange, ...other }: TextFieldProps & React.ComponentProps<typeof Input>) {
   return (
-    <FormControl isInvalid={isError} isRequired>
+    <FormControl isInvalid={isError}>
       <FormLabel htmlFor={label}>{label}</FormLabel>
-        <Input id={label} type="text" value={value} onChange={onChange} />
+        <Input id={label} type="text" value={value} onChange={onChange} {...other}/>
       <FormErrorMessage>{errorMsg}</FormErrorMessage>
     </FormControl>
   );
