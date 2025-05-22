@@ -5,7 +5,7 @@ import { useState } from "react";
 type AddItemFormProps = {
     title: string;
     labels: string[];
-    onSubmit: (input: Record<string, string>) => Promise<void>;
+    onItemAdd: (input: Record<string, string>) => Promise<void>;
 }
 
 type TextFieldState = {
@@ -13,7 +13,7 @@ type TextFieldState = {
     isError: boolean;
 }
 
-export default function AddItemForm({ title, labels, onSubmit, ...other }: AddItemFormProps & React.ComponentProps<typeof VStack>) {
+export default function AddItemForm({ title, labels, onItemAdd, ...other }: AddItemFormProps & React.ComponentProps<typeof VStack>) {
 
     const [ values, setValues ] = useState<Record<string, TextFieldState>>(() =>
         Object.fromEntries(
@@ -39,7 +39,7 @@ export default function AddItemForm({ title, labels, onSubmit, ...other }: AddIt
         updateField(label, { value: nextValue, isError: nextValue.trim().length === 0 })
     }
     
-    const handleSubmit = async () => {
+    const handleAddItem = async () => {
         const input: Record<string, string> = {};
 
         for (const entry of Object.entries(values)) {
@@ -49,7 +49,7 @@ export default function AddItemForm({ title, labels, onSubmit, ...other }: AddIt
         }
 
         setFormState("submitting");
-        await onSubmit(input);
+        await onItemAdd(input);
         setFormState("idle");
     }
 
@@ -78,7 +78,7 @@ export default function AddItemForm({ title, labels, onSubmit, ...other }: AddIt
                 />
             ))}
             <Button 
-                onClick={() => handleSubmit()}
+                onClick={() => handleAddItem()}
                 isLoading={formState === "submitting"}
                 padding={5}
                 px={6}

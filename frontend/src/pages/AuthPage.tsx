@@ -96,13 +96,13 @@ export default function AuthPage() {
         <HStack padding={2} pt={4} spacing={8}>
             <Button 
                 onClick={() => handleAuth("login")} 
-                isDisabled={formState === "register"} 
+                isDisabled={formState !== "login"}
                 isLoading={formState === "login"}
                 minW="90px"
             >Login</Button>
             <Button 
                 onClick={() => handleAuth("register")} 
-                isDisabled={formState === "login"} 
+                isDisabled={formState !== "register"}
                 isLoading={formState === "register"}
             >Register</Button>
         </HStack>
