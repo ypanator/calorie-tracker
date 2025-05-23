@@ -1,4 +1,3 @@
-import { AxiosResponse } from "axios";
 import axiosInstance from "../axios-instance.ts";
 import { WorkWithMinDelay } from "../utils.tsx";
 import { useToastHelper } from "./useToastHelper.tsx";
