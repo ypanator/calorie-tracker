@@ -1,9 +1,7 @@
 import { Button, Center, HStack, VStack } from "@chakra-ui/react";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
-import { useToastHelper } from "../hooks/useToastHelper.tsx";
-import axiosInstance from "../axios-instance.ts";
-import { WorkWithMinDelay } from "../utils.tsx";
+import useRequestHelper from "../hooks/useRequestHelper.tsx";
 
 
 export default function AuthPage() {
@@ -15,7 +13,7 @@ export default function AuthPage() {
 
     const [formState, setFormState] = useState<"idle" | "login" | "register">("idle");
 
-    const { successToast, errorToast } = useToastHelper();
+    const apiCall = useRequestHelper();
 
     const isValid = (str: string, type: "username" | "password"): boolean => {
         if (type === "username") {
@@ -52,24 +50,14 @@ export default function AuthPage() {
         const payload = { username, password };
       
         try {
-          const result = await WorkWithMinDelay(axiosInstance.post(endpoint, payload));
-      
-          if (result.status >= 400) {
-            const msg = result.data.msg ?? result.data;
-            errorToast(msg);
-            console.error(msg);
-          } else {
             const successMsg =
               action === "register"
                 ? "Successfully registered! Please login."
                 : "Successfully logged in!";
-            successToast(successMsg);
-          }
-        } catch (err) {
-          errorToast("Could not connect to server. Please try again later.");
-          console.error(err);
+            await apiCall("post", endpoint, payload, successMsg);
+
         } finally {
-          setFormState("idle");
+            setFormState("idle");
         }
       };
       

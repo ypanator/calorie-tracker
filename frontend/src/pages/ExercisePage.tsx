@@ -4,6 +4,7 @@ import TextField from "../components/TextField.tsx";
 import { useState } from "react";
 import LabeledText from "../components/LabeledText.tsx";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
+import useRequestHelper from "../hooks/useRequestHelper.tsx";
 
 type ExerciseSearchItem = {
     name: string;
@@ -24,8 +25,18 @@ export default function ExercisePage() {
     const [ searchBarError, setSearchBarError ] = useState(false);
     const [ searchResult, setSearchResult ] = useState<ExerciseSearchItem[]>([]);
     const { errorToast } = useToastHelper();
+    const apiCall = useRequestHelper();
 
-    const addExercise = async (exercise: ExerciseAddItem) => { /* todo */ }
+    const addExercise = async (exercise: ExerciseAddItem) => {
+        const endpoint = "/exercise/add";
+        const payload = exercise;
+
+        try {
+            await apiCall("post", endpoint, payload, "Exercise added successfully!");
+        } catch (err) {
+            console.error(err);
+        }
+    }
     
     const handleAddCustom = async (input: Record<string, string>) => {
         const name = input["Name"].trim();
@@ -64,10 +75,16 @@ export default function ExercisePage() {
             return;
         }
 
-        // todo: API call
-        const data: ExerciseSearchItem[] = []
+        const endpoint = "/exercise/find";
+        const payload = { name: query, duration: 30 };
 
-        setSearchResult(data);
+        try {
+            const data = await apiCall("get", endpoint, payload, "Search completed successfully!");
+            setSearchResult(data.data.data);
+        } catch (err) {
+            console.error(err);
+        }
+
     }
 
     return (
