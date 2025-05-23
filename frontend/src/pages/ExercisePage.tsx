@@ -80,9 +80,12 @@ export default function ExercisePage() {
 
         try {
             const data = await apiCall("get", endpoint, payload, "Search completed successfully!");
-            setSearchResult(data.data.data);
+            console.log(data.data.data.exercises);
+            console.log(searchResult)
+            setSearchResult(data.data.data.exercises || []);
         } catch (err) {
             console.error(err);
+            setSearchResult([]);
         }
 
     }
@@ -110,7 +113,7 @@ export default function ExercisePage() {
                 flexShrink={0}
             />
             <Button
-            colorScheme="black"
+            mt={7}
             onClick={
                 async () => await handleExerciseSearch(searchBar)
             }>Search</Button>

@@ -87,7 +87,8 @@ export default function FoodPage() {
 
         try {
             const data = await apiCall("get", endpoint, payload, "Search completed successfully!");
-            setSearchResult(data.data.data);
+            console.log(data.data.data.foods);
+            setSearchResult(data.data.data.foods || []);
         } catch (err) {
             console.error(err);
         }
@@ -115,8 +116,7 @@ export default function FoodPage() {
                 minW="500px"
                 flexShrink={0}
             />
-            <Button
-            colorScheme="black"
+            <Button mt={7} 
             onClick={
                 async () => await handleFoodSearch(searchBar)
             }>Search</Button>

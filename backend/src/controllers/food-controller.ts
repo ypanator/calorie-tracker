@@ -37,7 +37,7 @@ export default class FoodController {
          *       400: { description: Invalid input }
          *       401: { description: Unauthorized }
          */
-        this.router.get("/find", requireAuth, async (req, res, next) => {
+        this.router.get("/find", async (req, res, next) => {
             try {
                 let query: string = typeof req.query.name === "string" ? req.query.name : "";
                 query = query.trim().replace(/[^a-zA-Z\s]/g, "");

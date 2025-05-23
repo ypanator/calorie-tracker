@@ -7,7 +7,6 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { IconContext } from 'react-icons'
 
 createRoot(document.getElementById('root')!).render(
-    <StrictMode>
     <IconContext.Provider value={{ color: "white", size: "25", style: { display: "inline" } }}>
     <ChakraProvider theme={theme}>
     <Router>
@@ -15,5 +14,4 @@ createRoot(document.getElementById('root')!).render(
     </Router>
     </ChakraProvider>
     </IconContext.Provider>
-    </StrictMode>
 )

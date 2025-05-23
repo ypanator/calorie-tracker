@@ -1,103 +1,90 @@
-import { useState } from 'react';
-import { Button, VStack, Text } from '@chakra-ui/react';
-import TextField from './TextField';
+import { VStack, Text, HStack, Button } from "@chakra-ui/react";
+import TextField from "./TextField.tsx";
+import { useState } from "react";
 
-interface AddItemFormProps {
+type AddItemFormProps = {
     title: string;
     labels: string[];
     onItemAdd: (input: Record<string, string>) => Promise<void>;
-    minH?: string;
-    placeholders?: string[];
 }
 
-export default function AddItemForm({ 
-    title, 
-    labels, 
-    onItemAdd, 
-    minH = "auto",
-    placeholders = [] 
-}: AddItemFormProps) {
-    const [inputs, setInputs] = useState<Record<string, string>>(
-        Object.fromEntries(labels.map(label => [label, ""]))
-    );
-    const [errors, setErrors] = useState<Record<string, boolean>>(
-        Object.fromEntries(labels.map(label => [label, false]))
-    );
-    const [isLoading, setIsLoading] = useState(false);
+type TextFieldState = {
+    value: string;
+    isError: boolean;
+}
 
-    const handleSubmit = async () => {
-        const newErrors = { ...errors };
-        let hasError = false;
+export default function AddItemForm({ title, labels, onItemAdd, ...other }: AddItemFormProps & React.ComponentProps<typeof VStack>) {
 
-        labels.forEach(label => {
-            if (inputs[label].trim() === "") {
-                newErrors[label] = true;
-                hasError = true;
+    const [ values, setValues ] = useState<Record<string, TextFieldState>>(() =>
+        Object.fromEntries(
+            labels.map((label) => [label, {
+                value: "",
+                isError: false,
+        }]))
+    );
+
+    const [ formState, setFormState ] = useState<"idle" | "submitting">("idle");
+
+    const updateField = (key: string, partial: Partial<TextFieldState>) => {
+        setValues((prev) => ({
+            ...prev,
+            [key]: {
+                ...prev[key],
+                ...partial,
             }
-        });
+        }));
+    }
 
-        if (hasError) {
-            setErrors(newErrors);
-            return;
+    const handleOnChange = (label: string, nextValue: string) => {
+        updateField(label, { value: nextValue, isError: nextValue.trim().length === 0 })
+    }
+    
+    const handleAddItem = async () => {
+        const input: Record<string, string> = {};
+
+        for (const entry of Object.entries(values)) {
+            const [key, value] = entry;
+            if (value.isError) { return; }
+            input[key] = value.value;
         }
 
-        setIsLoading(true);
-        try {
-            await onItemAdd(inputs);
-            // Reset form after successful submission
-            setInputs(Object.fromEntries(labels.map(label => [label, ""])));
-            setErrors(Object.fromEntries(labels.map(label => [label, false])));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        setFormState("submitting");
+        await onItemAdd(input);
+        setFormState("idle");
+    }
 
     return (
-        <VStack
-            spacing={6}
-            align="stretch"
-            minH={minH}
-            p={6}
-            bg="background.elevated"
-            borderRadius="xl"
-            borderWidth="1px"
-            borderColor="whiteAlpha.100"
-            boxShadow="lg"
-            w="100%"
-        >
-            <Text textStyle="h2">{title}</Text>
-            
-            <VStack spacing={4} align="stretch">
-                {labels.map((label, index) => (
-                    <TextField
-                        key={label}
-                        label={label}
-                        value={inputs[label]}
-                        onChange={(e) => {
-                            setInputs({ ...inputs, [label]: e.target.value });
-                            setErrors({ ...errors, [label]: false });
-                        }}
-                        isError={errors[label]}
-                        errorMsg={`${label} cannot be empty`}
-                        placeholder={placeholders[index] || ""}
-                    />
-                ))}
-            </VStack>
-
-            <Button
-                onClick={handleSubmit}
-                isLoading={isLoading}
-                variant="solid"
-                size="lg"
-                mt={4}
-                _hover={{
-                    transform: "translateY(-1px)",
-                    boxShadow: "lg",
-                }}
-                transition="all 0.2s"
-            >
-                Add {title}
-            </Button>
-        </VStack>
-    );
+    <VStack 
+        spacing={5} 
+        align="stretch" 
+        width="max-content" 
+        margin={6} 
+        padding={6} 
+        borderWidth={2} 
+        borderRadius="md" 
+        boxShadow="dark-lg"
+        {...other}
+    >
+        <Text as="b" fontSize="25px">{title}</Text>
+        <HStack spacing={7} justify="space-evenly" align="flex-start">
+            {labels.map((label) => (
+                <TextField
+                    key={label}
+                    label={label}
+                    errorMsg="Cannot be empty."
+                    isError={values[label].isError}
+                    value={values[label].value}
+                    onChange={(e) => {handleOnChange(label, e.target.value)}}
+                    maxW={170}
+                />
+            ))}
+            <Button 
+                onClick={() => handleAddItem()}
+                isLoading={formState === "submitting"}
+                px={6}
+                mt={7}
+            >Add</Button>
+        </HStack>
+    </VStack>
+    )
 }

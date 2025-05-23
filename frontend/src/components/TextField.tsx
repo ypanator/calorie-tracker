@@ -25,7 +25,7 @@ export default function TextField({
             </FormLabel>
             <Input
                 variant="filled"
-                bg="background.elevated"
+                bg="gray.700"
                 borderWidth={1}
                 borderColor={isError ? "brand.error" : "whiteAlpha.200"}
                 _hover={{

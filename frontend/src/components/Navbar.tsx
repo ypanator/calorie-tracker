@@ -32,19 +32,19 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 background: "background.secondary",
             }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            spacing={5}
+            spacing={7}
             p={4}
             align="stretch"
             justify="flex-start"
             shadow="dark-lg"
-            boxShadow="0 4px 30px rgba(0, 0, 0, 0.3)"
             overflow="hidden"
             whiteSpace="nowrap"
-            borderRightWidth="1px"
-            borderRightColor="whiteAlpha.100"
+            borderRightWidth={2}
+            borderRightColor="whiteAlpha.200"
         >
             <IconButton
                 icon={collapsed ? <ChevronRightIcon boxSize={6} /> : <ChevronLeftIcon boxSize={6}/>}
+                bg="gray.700"
                 onClick={() => setCollapsed(!collapsed)}
                 aria-label="Toggle navbar"
                 variant="ghost"
@@ -57,15 +57,15 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 }}
                 transition="all 0.2s"
             />
-            <VStack spacing={2} align="stretch" flex={1}>
-                <MotionBox
+            <VStack spacing={5} align="stretch" flex={1}>
+                <MotionVStack
                     initial="expanded"
                     animate={collapsed ? "collapsed" : "expanded"}
                     variants={childVariants}
                     transition={{ duration: 0.2 }}
                 >
                     {children}
-                </MotionBox>
+                </MotionVStack>
             </VStack>
         </MotionVStack>
     );

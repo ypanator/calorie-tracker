@@ -8,7 +8,7 @@ export const useToastHelper = () => {
       title: "Success",
       description: message,
       status: "success",
-      duration: 5000,
+      duration: 2000,
       isClosable: true,
       position: "bottom-right"
     });
@@ -19,7 +19,7 @@ export const useToastHelper = () => {
       title: "Error",
       description: message,
       status: "error",
-      duration: 5000,
+      duration: 2000,
       isClosable: true,
       position: "bottom-right"
     });
@@ -30,7 +30,7 @@ export const useToastHelper = () => {
       title: "Information",
       description: message,
       status: "info",
-      duration: 5000,
+      duration: 2000,
       isClosable: true,
       position: "bottom-right"
     });
