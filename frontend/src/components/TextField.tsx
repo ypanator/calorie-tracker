@@ -1,19 +1,49 @@
-import { FormControl, FormErrorMessage, FormLabel, Input } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, FormErrorMessage, FormHelperText, InputProps } from "@chakra-ui/react";
 
-interface TextFieldProps {
-  label: string;
-  errorMsg: string;
-  isError: boolean;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+interface TextFieldProps extends InputProps {
+    label: string;
+    errorMsg?: string;
+    isError?: boolean;
+    helperText?: string;
 }
 
-export default function TextField({ label, errorMsg, isError, value, onChange, ...other }: TextFieldProps & React.ComponentProps<typeof Input>) {
-  return (
-    <FormControl isInvalid={isError}>
-      <FormLabel htmlFor={label}>{label}</FormLabel>
-        <Input id={label} type="text" value={value} onChange={onChange} {...other}/>
-      <FormErrorMessage>{errorMsg}</FormErrorMessage>
-    </FormControl>
-  );
+export default function TextField({ 
+    label, 
+    errorMsg, 
+    isError, 
+    helperText,
+    ...props 
+}: TextFieldProps) {
+    return (
+        <FormControl isInvalid={isError}>
+            <FormLabel
+                fontSize="sm"
+                fontWeight="medium"
+                color="whiteAlpha.900"
+            >
+                {label}
+            </FormLabel>
+            <Input
+                variant="filled"
+                bg="background.elevated"
+                borderWidth={1}
+                borderColor={isError ? "brand.error" : "whiteAlpha.200"}
+                _hover={{
+                    bg: "background.elevated",
+                    borderColor: isError ? "brand.error" : "whiteAlpha.400"
+                }}
+                _focus={{
+                    bg: "background.elevated",
+                    borderColor: isError ? "brand.error" : "brand.primary"
+                }}
+                transition="all 0.2s"
+                {...props}
+            />
+            {isError ? (
+                <FormErrorMessage fontSize="sm">{errorMsg}</FormErrorMessage>
+            ) : helperText ? (
+                <FormHelperText fontSize="sm">{helperText}</FormHelperText>
+            ) : null}
+        </FormControl>
+    );
 }

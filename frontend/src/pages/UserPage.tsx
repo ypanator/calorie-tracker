@@ -11,42 +11,24 @@ import {
     ModalHeader,
     ModalBody,
     ModalCloseButton,
-    useDisclosure
+    useDisclosure,
+    Box,
+    Divider,
+    Badge
 } from "@chakra-ui/react";
+import { FaUser } from "react-icons/fa";
 import AddItemForm from "../components/AddItemForm.tsx";
 import LabeledText from "../components/LabeledText.tsx";
 import { useEffect, useState } from "react";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
 import useRequestHelper from "../hooks/useRequestHelper.tsx";
-
-type UserProfile = {
-    gender: "male" | "female";
-    age: number;
-    height: number;
-    weight: number;
-    bmi: string;
-    calories: string;
-    carbs: string;
-    fiber: string;
-    protein: string;
-    fat: string;
-    exercises: Array<{
-        name: string;
-        time: number;
-        calories: number;
-    }>;
-    foods: Array<{
-        name: string;
-        count: number;
-        unit: string;
-        calories: number;
-    }>;
-}
+import { type UserProfile } from "../types/user-type";
 
 export default function UserPage() {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const { errorToast } = useToastHelper();
     const apiCall = useRequestHelper();
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const loadProfile = async () => {
         const endpoint = "/user/profile";
@@ -99,105 +81,143 @@ export default function UserPage() {
         }
     };
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
     return (
-        <VStack spacing={8} p={4} align="flex-start">
-            <HStack w="100%" maxW="800px" justify="space-between">
-                <Text fontSize="2xl" fontWeight="bold">Profile</Text>
-                <Button colorScheme="black" onClick={onOpen}>Update Profile</Button>
+        <VStack spacing={8} p={6} align="flex-start" maxW="1200px" mx="auto">
+            <HStack w="100%" justify="space-between" mb={2}>
+                <Text textStyle="h1" color="whiteAlpha.900">Profile Dashboard</Text>
+                <Button 
+                    onClick={onOpen}
+                    variant="solid"
+                    leftIcon={<FaUser />}
+                >
+                    Update Profile
+                </Button>
             </HStack>
             
-            <VStack align="flex-start" spacing={4} 
-                borderWidth={2} 
-                borderRadius="md" 
-                p={4} 
+            <Box 
                 w="100%"
-                maxW="800px"
+                bg="background.secondary"
+                borderRadius="xl"
+                p={6}
+                boxShadow="xl"
+                borderWidth="1px"
+                borderColor="whiteAlpha.100"
             >
-                <Text fontSize="2xl" fontWeight="bold">Current Profile</Text>
-                {profile && (
+                {profile ? (
                     <>
                         <HStack spacing={12} alignItems="flex-start">
-                            <VStack align="flex-start">
-                                <Text fontWeight="semibold">Personal Information</Text>
-                                <LabeledText label="Gender" text={profile.gender} />
-                                <LabeledText label="Age" text={profile.age.toString()} />
-                                <LabeledText label="Height" text={`${profile.height} cm`} />
-                                <LabeledText label="Weight" text={`${profile.weight} kg`} />
-                                <LabeledText label="Last updated" text={new Date().toLocaleDateString()} />
+                            <VStack align="flex-start" flex={1}>
+                                <Text textStyle="h2" mb={4}>Personal Information</Text>
+                                <HStack spacing={8} w="100%">
+                                    <VStack align="flex-start" flex={1}>
+                                        <LabeledText label="Gender" text={profile.gender} />
+                                        <LabeledText label="Age" text={profile.age.toString()} />
+                                    </VStack>
+                                    <VStack align="flex-start" flex={1}>
+                                        <LabeledText label="Height" text={`${profile.height} cm`} />
+                                        <LabeledText label="Weight" text={`${profile.weight} kg`} />
+                                    </VStack>
+                                </HStack>
+                                <Text textStyle="subtitle" mt={4}>
+                                    Last updated: {new Date().toLocaleDateString()}
+                                </Text>
                             </VStack>
-                            <VStack align="flex-start">
-                                <Text fontWeight="semibold">Nutrition Information</Text>
-                                <LabeledText label="BMI" text={profile.bmi} />
-                                <LabeledText label="Daily Calories" text={profile.calories} />
-                                <LabeledText label="Carbohydrates" text={profile.carbs} />
-                                <LabeledText label="Fiber" text={profile.fiber} />
-                                <LabeledText label="Protein" text={profile.protein} />
-                                <LabeledText label="Fat" text={profile.fat} />
+                            
+                            <Divider orientation="vertical" h="150px" />
+                            
+                            <VStack align="flex-start" flex={1}>
+                                <Text textStyle="h2" mb={4}>Nutrition Stats</Text>
+                                <HStack spacing={8} w="100%">
+                                    <VStack align="flex-start" flex={1}>
+                                        <Badge colorScheme="purple" mb={2}>Daily Goals</Badge>
+                                        <LabeledText label="Calories" text={profile.calories} />
+                                        <LabeledText label="Protein" text={profile.protein} />
+                                    </VStack>
+                                    <VStack align="flex-start" flex={1}>
+                                        <Badge colorScheme="teal" mb={2}>Macros</Badge>
+                                        <LabeledText label="Carbs" text={profile.carbs} />
+                                        <LabeledText label="Fat" text={profile.fat} />
+                                    </VStack>
+                                </HStack>
+                                <Text textStyle="subtitle" mt={4}>
+                                    BMI: {profile.bmi}
+                                </Text>
                             </VStack>
                         </HStack>
-                        <Text color="gray.500" fontSize="sm" mb={4}>
-                            Statistics are calculated based on your profile information
-                        </Text>
-                        
-                        <VStack align="flex-start" w="100%" spacing={4}>
-                            <Text fontWeight="semibold">Exercise History</Text>
-                            {profile.exercises.length > 0 ? (
-                                <List w="100%">
-                                    {profile.exercises.map((exercise, index) => (
-                                        <ListItem key={index}>
-                                            <HStack>
-                                                <LabeledText label="Name" text={exercise.name} />
-                                                <LabeledText label="Duration" text={`${exercise.time} minutes`} />
-                                                <LabeledText label="Calories" text={exercise.calories.toString()} />
-                                            </HStack>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                            ) : (
-                                <Text color="gray.500">No exercises recorded yet</Text>
-                            )}
-                        </VStack>
 
-                        <VStack align="flex-start" w="100%" spacing={4}>
-                            <Text fontWeight="semibold">Food History</Text>
-                            {profile.foods.length > 0 ? (
-                                <List w="100%">
-                                    {profile.foods.map((food, index) => (
-                                        <ListItem key={index}>
-                                            <HStack>
-                                                <LabeledText label="Name" text={food.name} />
-                                                <LabeledText label="Amount" text={`${food.count} ${food.unit}`} />
-                                                <LabeledText label="Calories" text={food.calories.toString()} />
-                                            </HStack>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                            ) : (
-                                <Text color="gray.500">No foods recorded yet</Text>
-                            )}
-                        </VStack>
+                        <Divider my={8} />
+
+                        <HStack spacing={8} alignItems="flex-start">
+                            <VStack align="flex-start" flex={1} bg="background.elevated" p={6} borderRadius="lg">
+                                <Text textStyle="h2" mb={4}>Exercise History</Text>
+                                {profile.exercises.length > 0 ? (
+                                    <List w="100%" spacing={3}>
+                                        {profile.exercises.map((exercise, index) => (
+                                            <ListItem 
+                                                key={index}
+                                                p={3}
+                                                bg="background.secondary"
+                                                borderRadius="md"
+                                                transition="all 0.2s"
+                                                _hover={{ transform: "translateY(-2px)" }}
+                                            >
+                                                <HStack spacing={4}>
+                                                    <LabeledText label="Activity" text={exercise.name} />
+                                                    <LabeledText label="Duration" text={`${exercise.time} min`} />
+                                                    <Badge colorScheme="orange">{exercise.calories} cal</Badge>
+                                                </HStack>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                ) : (
+                                    <Text textStyle="subtitle">No exercises recorded yet</Text>
+                                )}
+                            </VStack>
+
+                            <VStack align="flex-start" flex={1} bg="background.elevated" p={6} borderRadius="lg">
+                                <Text textStyle="h2" mb={4}>Food History</Text>
+                                {profile.foods.length > 0 ? (
+                                    <List w="100%" spacing={3}>
+                                        {profile.foods.map((food, index) => (
+                                            <ListItem 
+                                                key={index}
+                                                p={3}
+                                                bg="background.secondary"
+                                                borderRadius="md"
+                                                transition="all 0.2s"
+                                                _hover={{ transform: "translateY(-2px)" }}
+                                            >
+                                                <HStack spacing={4}>
+                                                    <LabeledText label="Item" text={food.name} />
+                                                    <LabeledText label="Amount" text={`${food.count} ${food.unit}`} />
+                                                    <Badge colorScheme="teal">{food.calories} cal</Badge>
+                                                </HStack>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                ) : (
+                                    <Text textStyle="subtitle">No foods recorded yet</Text>
+                                )}
+                            </VStack>
+                        </HStack>
                     </>
+                ) : (
+                    <VStack p={8} spacing={4}>
+                        <Text textStyle="subtitle">Loading profile information...</Text>
+                    </VStack>
                 )}
-                {!profile && (
-                    <Text color="gray.500">Loading profile information...</Text>
-                )}
-            </VStack>
+            </Box>
 
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
-                <ModalOverlay />
-                <ModalContent>
+                <ModalOverlay backdropFilter="blur(4px)" />
+                <ModalContent bg="background.secondary">
                     <ModalHeader>Update Profile</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <AddItemForm
-                            title="Update Profile Information"
+                            title="Profile Information"
                             labels={["Gender", "Age", "Height", "Weight"]}
-                            onItemAdd={async (input) => {
-                                await handleUpdateProfile(input);
-                                onClose();
-                            }}
+                            onItemAdd={handleUpdateProfile}
                             placeholders={["male/female", "years", "cm", "kg"]}
                             minH="215px"
                         />
@@ -207,4 +227,3 @@ export default function UserPage() {
         </VStack>
     );
 }
-// Compare this snippet from frontend/src/pages/ExercisePage.tsx:
