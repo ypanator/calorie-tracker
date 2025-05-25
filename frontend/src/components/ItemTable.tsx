@@ -1,4 +1,4 @@
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, Box, Text } from "@chakra-ui/react"
 
 interface props {
     headers: string[]
@@ -7,25 +7,63 @@ interface props {
 
 export default function ItemTable({ headers, data }: props) {
     return (
-    <TableContainer w="100%">
-    <Table variant="unstyled" w="100%" size="lg">
-    
-    <Thead borderBottom="1px" borderColor="whiteAlpha.300">
-    <Tr>
-        {headers.map((h) => <Th key={h} py={4}>{h}</Th>)}
-    </Tr>
-    </Thead>
-
-    <Tbody>
-        {data.map((row, rowIdx) => 
-            <Tr key={rowIdx} borderBottom="1px" borderColor="whiteAlpha.300">
-                {headers.map((h) => 
-                    <Td key={h} py={4}>{row[h] ?? ""}</Td>)}
+    <Box 
+        width="100%" 
+        maxW="1200px"
+        margin={6} 
+        padding={6} 
+        borderWidth={2} 
+        borderRadius="md" 
+        boxShadow="dark-lg"
+    >
+        <TableContainer>
+        <Table size="lg" layout="fixed">
+            <Thead>
+            <Tr>
+                {headers.map((h, i) => (
+                    <Th 
+                        key={h} 
+                        py={4} 
+                        borderRight={i < headers.length - 1 ? "1px" : "none"} 
+                        borderColor="whiteAlpha.300"                        whiteSpace="normal"
+                        wordBreak="break-word"
+                        width={h === "Action" ? "150px" : "auto"}
+                    >
+                        {h}
+                    </Th>
+                ))}
             </Tr>
-        )}
-    </Tbody>
+            </Thead>
 
-    </Table>
-    </TableContainer>
+            <Tbody>
+                {data.map((row, rowIdx) => 
+                    <Tr key={rowIdx}>
+                        {headers.map((h, i) => 
+                            <Td 
+                                key={h} 
+                                py={4}                                borderRight={i < headers.length - 1 ? "1px" : "none"} 
+                                borderColor="whiteAlpha.300"
+                                width={h === "Action" ? "150px" : "auto"}
+                            >
+                                {h === "Action" ? (
+                                    <Box textAlign="center">
+                                        {row[h]}
+                                    </Box>
+                                ) : (
+                                    <Text 
+                                        isTruncated
+                                        title={row[h]?.toString() ?? ""}
+                                    >
+                                        {row[h] ?? ""}
+                                    </Text>
+                                )}
+                            </Td>
+                        )}
+                    </Tr>
+                )}
+            </Tbody>
+        </Table>
+        </TableContainer>
+    </Box>
     )
 }

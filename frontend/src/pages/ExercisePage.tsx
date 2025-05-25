@@ -1,4 +1,4 @@
-import { Button, HStack, VStack } from "@chakra-ui/react";
+import { Button, HStack, VStack, Center } from "@chakra-ui/react";
 import AddItemForm from "../components/AddItemForm.tsx";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
@@ -91,48 +91,50 @@ export default function ExercisePage() {
     }
     
     return (
-    <VStack spacing={6}>
-        <AddItemForm 
-            title="Add Custom Exercise"
-            labels={["Name", "Duration", "Calories Burned"]}
-            onItemAdd={async (input) => await handleAddCustom(input)}
-            minH="215px"
-        />
-        <HStack>
-            <TextField
-                label="Search by name"
-                errorMsg="Cannot be empty"
-                isError={searchBarError}
-                value={searchBar}
-                onChange={(e) => {
-                    setSearchBarError(e.target.value.trim().length === 0)
-                    setSearchBar(e.target.value)
-                }}
-                w="auto"
-                minW="500px"
-                flexShrink={0}
+    <Center>
+        <VStack spacing={6} align="center" maxW="1200px" w="100%">
+            <AddItemForm 
+                title="Add Custom Exercise"
+                labels={["Name", "Duration", "Calories Burned"]}
+                onItemAdd={async (input) => await handleAddCustom(input)}
+                minH="215px"
             />
-            <Button
-                mt={7}
-                onClick={async () => await handleExerciseSearch(searchBar)}
-            >Search</Button>
-        </HStack>
-        {searchResult.length > 0 && (
-            <ItemTable
-                headers={["Name", "Calories/hr", "Duration (min)", "Total Calories", "Action"]}
-                data={searchResult.map(exercise => ({
-                    Name: exercise.name,
-                    "Calories/hr": exercise.calories_per_hour,
-                    "Duration (min)": exercise.duration_minutes,
-                    "Total Calories": exercise.total_calories,
-                    Action: (
-                        <Button size="sm" onClick={() => handleAddExercise(exercise)}>
-                            Add
-                        </Button>
-                    )
-                }))}
-            />
-        )}
-    </VStack>
+            <HStack>
+                <TextField
+                    label="Search by name"
+                    errorMsg="Cannot be empty"
+                    isError={searchBarError}
+                    value={searchBar}
+                    onChange={(e) => {
+                        setSearchBarError(e.target.value.trim().length === 0)
+                        setSearchBar(e.target.value)
+                    }}
+                    w="auto"
+                    minW="500px"
+                    flexShrink={0}
+                />
+                <Button
+                    mt={7}
+                    onClick={async () => await handleExerciseSearch(searchBar)}
+                >Search</Button>
+            </HStack>
+            {searchResult.length > 0 && (
+                <ItemTable
+                    headers={["Name", "Calories/hr", "Duration (min)", "Total Calories", "Action"]}
+                    data={searchResult.map(exercise => ({
+                        Name: exercise.name,
+                        "Calories/hr": exercise.calories_per_hour,
+                        "Duration (min)": exercise.duration_minutes,
+                        "Total Calories": exercise.total_calories,
+                        Action: (
+                            <Button size="sm" onClick={() => handleAddExercise(exercise)}>
+                                Add
+                            </Button>
+                        )
+                    }))}
+                />
+            )}
+        </VStack>
+    </Center>
     );
 }
