@@ -1,10 +1,10 @@
-import { Button, HStack, List, ListItem, VStack } from "@chakra-ui/react";
+import { Button, HStack, VStack } from "@chakra-ui/react";
 import AddItemForm from "../components/AddItemForm.tsx";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
-import LabeledText from "../components/LabeledText.tsx";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
 import useRequestHelper from "../hooks/useRequestHelper.tsx";
+import ItemTable from "../components/ItemTable.tsx";
 
 type ExerciseSearchItem = {
     name: string;
@@ -89,9 +89,9 @@ export default function ExercisePage() {
         }
 
     }
-
+    
     return (
-    <VStack>
+    <VStack spacing={6}>
         <AddItemForm 
             title="Add Custom Exercise"
             labels={["Name", "Duration", "Calories Burned"]}
@@ -113,26 +113,26 @@ export default function ExercisePage() {
                 flexShrink={0}
             />
             <Button
-            mt={7}
-            onClick={
-                async () => await handleExerciseSearch(searchBar)
-            }>Search</Button>
+                mt={7}
+                onClick={async () => await handleExerciseSearch(searchBar)}
+            >Search</Button>
         </HStack>
-        <List>
-            {searchResult.map((exercise) => (
-                <ListItem key={exercise.name + exercise.calories_per_hour}>
-                    <HStack>
-                        <LabeledText label="Name"               text={exercise.name} />
-                        <LabeledText label="Calories per hour"  text={exercise.calories_per_hour.toString()} />
-                        <LabeledText label="Duration"           text={exercise.duration_minutes.toString()} />
-                        <LabeledText label="Total calories"     text={exercise.total_calories.toString()} />
-                        <Button colorScheme="black" onClick={async () => {
-                            await handleAddExercise(exercise);
-                        }}>Add</Button>
-                    </HStack>
-                </ListItem>
-            ))}
-        </List>
+        {searchResult.length > 0 && (
+            <ItemTable
+                headers={["Name", "Calories/hr", "Duration (min)", "Total Calories", "Action"]}
+                data={searchResult.map(exercise => ({
+                    Name: exercise.name,
+                    "Calories/hr": exercise.calories_per_hour,
+                    "Duration (min)": exercise.duration_minutes,
+                    "Total Calories": exercise.total_calories,
+                    Action: (
+                        <Button size="sm" onClick={() => handleAddExercise(exercise)}>
+                            Add
+                        </Button>
+                    )
+                }))}
+            />
+        )}
     </VStack>
     );
 }

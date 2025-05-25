@@ -2,8 +2,8 @@ import {
     HStack, 
     VStack, 
     Text, 
-    List, 
-    ListItem, 
+    List,
+    ListItem,
     Button, 
     Modal,
     ModalOverlay,
@@ -17,16 +17,13 @@ import {
     Badge
 } from "@chakra-ui/react";
 import { FaUser } from "react-icons/fa";
-import AddItemForm from "../components/AddItemForm.tsx";
 import LabeledText from "../components/LabeledText.tsx";
+import UserProfileForm from "../components/UserProfileForm.tsx";
 import { useEffect, useState } from "react";
-import { useToastHelper } from "../hooks/useToastHelper.tsx";
 import useRequestHelper from "../hooks/useRequestHelper.tsx";
 import { type UserProfile } from "../types/user-type";
 
-export default function UserPage() {
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const { errorToast } = useToastHelper();
+export default function UserPage() {    const [profile, setProfile] = useState<UserProfile | null>(null);
     const apiCall = useRequestHelper();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -44,38 +41,25 @@ export default function UserPage() {
         loadProfile();
     }, []);
 
-    const handleUpdateProfile = async (input: Record<string, string>) => {
-        const age = parseInt(input["Age"]);
-        const height = parseInt(input["Height"]);
-        const weight = parseInt(input["Weight"]);
-        const gender = input["Gender"].toLowerCase();
-
-        if (isNaN(age) || age <= 0 || age > 100) {
-            errorToast("Age must be between 1 and 100.");
-            return;
-        }
-
-        if (isNaN(height) || height < 120 || height > 250) {
-            errorToast("Height must be between 120 and 250 cm.");
-            return;
-        }
-
-        if (isNaN(weight) || weight < 30 || weight > 300) {
-            errorToast("Weight must be between 30 and 300 kg.");
-            return;
-        }
-
-        if (gender !== "male" && gender !== "female") {
-            errorToast("Gender must be either 'male' or 'female'.");
-            return;
-        }
+    const handleUpdateProfile = async (values: {
+        gender: string;
+        age: string;
+        height: string;
+        weight: string;
+    }) => {
+        const payload = {
+            gender: values.gender.toLowerCase(),
+            age: parseInt(values.age),
+            height: parseInt(values.height),
+            weight: parseInt(values.weight)
+        };
 
         const endpoint = "/user/set-attr";
-        const payload = { gender, age, height, weight };
 
         try {
             await apiCall("post", endpoint, payload, "Profile updated successfully!");
             await loadProfile();
+            onClose();
         } catch (err) {
             console.error(err);
         }
@@ -149,22 +133,45 @@ export default function UserPage() {
 
                         <HStack spacing={8} alignItems="flex-start">
                             <VStack align="flex-start" flex={1} bg="background.elevated" p={6} borderRadius="lg">
-                                <Text textStyle="h2" mb={4}>Exercise History</Text>
+                                <HStack w="100%" justify="space-between" align="center">
+                                    <Text textStyle="h2">Exercise History</Text>
+                                    {profile.exercises.length > 4 && (
+                                        <Badge colorScheme="purple">{profile.exercises.length - 4} more</Badge>
+                                    )}
+                                </HStack>
                                 {profile.exercises.length > 0 ? (
                                     <List w="100%" spacing={3}>
-                                        {profile.exercises.map((exercise, index) => (
+                                        {profile.exercises.slice(-4).reverse().map((exercise, index) => (
                                             <ListItem 
                                                 key={index}
-                                                p={3}
+                                                p={4}
                                                 bg="background.secondary"
-                                                borderRadius="md"
+                                                borderRadius="xl"
+                                                boxShadow="sm"
+                                                border="1px"
+                                                borderColor="whiteAlpha.100"
                                                 transition="all 0.2s"
-                                                _hover={{ transform: "translateY(-2px)" }}
+                                                _hover={{ 
+                                                    transform: "translateY(-2px)",
+                                                    boxShadow: "md",
+                                                    borderColor: "whiteAlpha.200"
+                                                }}
                                             >
-                                                <HStack spacing={4}>
-                                                    <LabeledText label="Activity" text={exercise.name} />
-                                                    <LabeledText label="Duration" text={`${exercise.time} min`} />
-                                                    <Badge colorScheme="orange">{exercise.calories} cal</Badge>
+                                                <HStack spacing={6}>
+                                                    <LabeledText 
+                                                        label="Activity" 
+                                                        text={exercise.name.length > 15 ? `${exercise.name.slice(0, 15)}...` : exercise.name} 
+                                                    />
+                                                    <LabeledText 
+                                                        label="Duration" 
+                                                        text={`${exercise.time}`.length > 3 ? `${exercise.time}`.slice(0, 3) + '..m' : `${exercise.time}m`} 
+                                                    />
+                                                    <Badge colorScheme="orange" p={2} borderRadius="md">
+                                                        {`${exercise.calories}`.length > 3 ? 
+                                                            `${exercise.calories}`.slice(0, 3) + 'kcal' : 
+                                                            `${exercise.calories}kcal`
+                                                        }
+                                                    </Badge>
                                                 </HStack>
                                             </ListItem>
                                         ))}
@@ -175,22 +182,48 @@ export default function UserPage() {
                             </VStack>
 
                             <VStack align="flex-start" flex={1} bg="background.elevated" p={6} borderRadius="lg">
-                                <Text textStyle="h2" mb={4}>Food History</Text>
+                                <HStack w="100%" justify="space-between" align="center">
+                                    <Text textStyle="h2">Food History</Text>
+                                    {profile.foods.length > 4 && (
+                                        <Badge colorScheme="purple">{profile.foods.length - 4} more</Badge>
+                                    )}
+                                </HStack>
                                 {profile.foods.length > 0 ? (
                                     <List w="100%" spacing={3}>
-                                        {profile.foods.map((food, index) => (
+                                        {profile.foods.slice(-4).reverse().map((food, index) => (
                                             <ListItem 
                                                 key={index}
-                                                p={3}
+                                                p={4}
                                                 bg="background.secondary"
-                                                borderRadius="md"
+                                                borderRadius="xl"
+                                                boxShadow="sm"
+                                                border="1px"
+                                                borderColor="whiteAlpha.100"
                                                 transition="all 0.2s"
-                                                _hover={{ transform: "translateY(-2px)" }}
+                                                _hover={{ 
+                                                    transform: "translateY(-2px)",
+                                                    boxShadow: "md",
+                                                    borderColor: "whiteAlpha.200"
+                                                }}
                                             >
-                                                <HStack spacing={4}>
-                                                    <LabeledText label="Item" text={food.name} />
-                                                    <LabeledText label="Amount" text={`${food.count} ${food.unit}`} />
-                                                    <Badge colorScheme="teal">{food.calories} cal</Badge>
+                                                <HStack spacing={6}>
+                                                    <LabeledText 
+                                                        label="Item" 
+                                                        text={food.name.length > 15 ? `${food.name.slice(0, 15)}...` : food.name} 
+                                                    />
+                                                    <LabeledText 
+                                                        label="Amount" 
+                                                        text={`${food.count}`.length > 3 ? 
+                                                            `${food.count}`.slice(0, 3) + `...${food.unit.slice(0, 1)}` :
+                                                            `${food.count}${food.unit.slice(0, 1)}`
+                                                        } 
+                                                    />
+                                                    <Badge colorScheme="teal" p={2} borderRadius="md">
+                                                        {`${food.calories}`.length > 3 ? 
+                                                            `${food.calories}`.slice(0, 3) + 'kcal' : 
+                                                            `${food.calories}kcal`
+                                                        }
+                                                    </Badge>
                                                 </HStack>
                                             </ListItem>
                                         ))}
@@ -208,18 +241,15 @@ export default function UserPage() {
                 )}
             </Box>
 
-            <Modal isOpen={isOpen} onClose={onClose} size="xl">
+            <Modal isOpen={isOpen} onClose={onClose} size="md">
                 <ModalOverlay backdropFilter="blur(4px)" />
                 <ModalContent bg="background.secondary">
                     <ModalHeader>Update Profile</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
-                        <AddItemForm
-                            title="Profile Information"
-                            labels={["Gender", "Age", "Height", "Weight"]}
-                            onItemAdd={handleUpdateProfile}
-                            placeholders={["male/female", "years", "cm", "kg"]}
-                            minH="215px"
+                        <UserProfileForm
+                            onSubmit={handleUpdateProfile}
+                            initialValues={profile || undefined}
                         />
                     </ModalBody>
                 </ModalContent>

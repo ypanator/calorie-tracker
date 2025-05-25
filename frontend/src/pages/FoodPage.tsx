@@ -1,10 +1,10 @@
-import { Button, HStack, List, ListItem, VStack } from "@chakra-ui/react";
+import { Button, HStack, VStack } from "@chakra-ui/react";
 import AddItemForm from "../components/AddItemForm.tsx";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
-import LabeledText from "../components/LabeledText.tsx";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
 import useRequestHelper from "../hooks/useRequestHelper.tsx";
+import ItemTable from "../components/ItemTable.tsx";
 
 type FoodSearchItem = {
     name: string;
@@ -36,7 +36,7 @@ export default function FoodPage() {
         } catch (err) {
             console.error(err);
         }
-    }
+    };
     
     const handleAddCustom = async (input: Record<string, string>) => {
         const name = input["Name"].trim();
@@ -65,7 +65,7 @@ export default function FoodPage() {
         }
 
         await addFood({ name, calories, count, unit });
-    }
+    };
 
     const handleAddFood = async (food: FoodSearchItem) => {
         await addFood({
@@ -74,7 +74,7 @@ export default function FoodPage() {
             count: food.count,
             unit: food.unit
         });
-    }
+    };
 
     const handleFoodSearch = async (query: string) => {
         if (query.trim().length === 0) {
@@ -87,55 +87,56 @@ export default function FoodPage() {
 
         try {
             const data = await apiCall("get", endpoint, payload, "Search completed successfully!");
-            console.log(data.data.data.foods);
             setSearchResult(data.data.data.foods || []);
         } catch (err) {
             console.error(err);
+            setSearchResult([]);
         }
-    }
+    };
 
     return (
-    <VStack>
-        <AddItemForm 
-            title="Add Custom Food"
-            labels={["Name", "Amount", "Unit", "Calories"]}
-            onItemAdd={async (input) => await handleAddCustom(input)}
-            minH="215px"
-        />
-        <HStack>
-            <TextField
-                label="Search by name"
-                errorMsg="Cannot be empty"
-                isError={searchBarError}
-                value={searchBar}
-                onChange={(e) => {
-                    setSearchBarError(e.target.value.trim().length === 0)
-                    setSearchBar(e.target.value)
-                }}
-                w="auto"
-                minW="500px"
-                flexShrink={0}
+        <VStack spacing={6}>
+            <AddItemForm 
+                title="Add Custom Food"
+                labels={["Name", "Amount", "Unit", "Calories"]}
+                onItemAdd={async (input) => await handleAddCustom(input)}
+                minH="215px"
             />
-            <Button mt={7} 
-            onClick={
-                async () => await handleFoodSearch(searchBar)
-            }>Search</Button>
-        </HStack>
-        <List>
-            {searchResult.map((food) => (
-                <ListItem key={food.name + food.calories}>
-                    <HStack>
-                        <LabeledText label="Name" text={food.name} />
-                        <LabeledText label="Amount" text={food.count.toString()} />
-                        <LabeledText label="Unit" text={food.unit} />
-                        <LabeledText label="Calories" text={food.calories.toString()} />
-                        <Button colorScheme="black" onClick={async () => {
-                            await handleAddFood(food);
-                        }}>Add</Button>
-                    </HStack>
-                </ListItem>
-            ))}
-        </List>
-    </VStack>
+            <HStack>
+                <TextField
+                    label="Search by name"
+                    errorMsg="Cannot be empty"
+                    isError={searchBarError}
+                    value={searchBar}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setSearchBarError(e.target.value.trim().length === 0);
+                        setSearchBar(e.target.value);
+                    }}
+                    w="auto"
+                    minW="500px"
+                    flexShrink={0}
+                />
+                <Button
+                    mt={7}
+                    onClick={async () => await handleFoodSearch(searchBar)}
+                >Search</Button>
+            </HStack>
+            {searchResult.length > 0 && (
+                <ItemTable
+                    headers={["Name", "Amount", "Unit", "Calories", "Action"]}
+                    data={searchResult.map(food => ({
+                        Name: food.name,
+                        Amount: food.count,
+                        Unit: food.unit,
+                        Calories: food.calories,
+                        Action: (
+                            <Button size="sm" onClick={() => handleAddFood(food)}>
+                                Add
+                            </Button>
+                        )
+                    }))}
+                />
+            )}
+        </VStack>
     );
 }

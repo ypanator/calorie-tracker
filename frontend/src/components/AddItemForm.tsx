@@ -11,7 +11,52 @@ type AddItemFormProps = {
 type TextFieldState = {
     value: string;
     isError: boolean;
+    errorMsg?: string;
 }
+
+type ValidationRule = {
+    maxLength: number;
+    pattern: RegExp;
+    patternMsg: string;
+    max?: number;
+}
+
+const VALIDATION_RULES: Record<string, ValidationRule> = {
+    Name: {
+        maxLength: 30,
+        pattern: /^[a-zA-Z0-9\s\-]+$/,
+        patternMsg: "Only letters, numbers, spaces and hyphens allowed"
+    },
+    Duration: {
+        maxLength: 4,
+        pattern: /^\d+$/,
+        patternMsg: "Must be a number",
+        max: 1440 // 24 hours in minutes
+    },
+    Amount: {
+        maxLength: 4,
+        pattern: /^\d+$/,
+        patternMsg: "Must be a number",
+        max: 9999
+    },
+    Unit: {
+        maxLength: 15,
+        pattern: /^[a-zA-Z\s]+$/,
+        patternMsg: "Only letters and spaces allowed"
+    },
+    "Calories Burned": {
+        maxLength: 5,
+        pattern: /^\d+$/,
+        patternMsg: "Must be a number",
+        max: 99999
+    },
+    Calories: {
+        maxLength: 5,
+        pattern: /^\d+$/,
+        patternMsg: "Must be a number",
+        max: 99999
+    }
+};
 
 export default function AddItemForm({ title, labels, onItemAdd, ...other }: AddItemFormProps & React.ComponentProps<typeof VStack>) {
 
@@ -20,7 +65,8 @@ export default function AddItemForm({ title, labels, onItemAdd, ...other }: AddI
             labels.map((label) => [label, {
                 value: "",
                 isError: false,
-        }]))
+                errorMsg: "Cannot be empty"
+            }]))
     );
 
     const [ formState, setFormState ] = useState<"idle" | "submitting">("idle");
@@ -35,22 +81,64 @@ export default function AddItemForm({ title, labels, onItemAdd, ...other }: AddI
         }));
     }
 
+    const validateField = (label: string, value: string): { isValid: boolean, errorMsg?: string } => {
+        if (value.trim().length === 0) {
+            return { isValid: false, errorMsg: "Cannot be empty" };
+        }
+
+        const rules = VALIDATION_RULES[label];
+        if (!rules) return { isValid: true };
+
+        if (value.length > rules.maxLength) {
+            return { isValid: false, errorMsg: `Maximum ${rules.maxLength} characters` };
+        }
+
+        if (!rules.pattern.test(value)) {
+            return { isValid: false, errorMsg: rules.patternMsg };
+        }
+
+        if (rules.max && parseInt(value) > rules.max) {
+            return { isValid: false, errorMsg: `Maximum value is ${rules.max}` };
+        }
+
+        return { isValid: true };
+    }
+
     const handleOnChange = (label: string, nextValue: string) => {
-        updateField(label, { value: nextValue, isError: nextValue.trim().length === 0 })
+        const validation = validateField(label, nextValue);
+        updateField(label, { 
+            value: nextValue,
+            isError: !validation.isValid,
+            errorMsg: validation.errorMsg
+        });
     }
     
     const handleAddItem = async () => {
         const input: Record<string, string> = {};
+        let hasError = false;
 
-        for (const entry of Object.entries(values)) {
-            const [key, value] = entry;
-            if (value.isError) { return; }
+        for (const [label, state] of Object.entries(values)) {
+            const validation = validateField(label, state.value);
+            if (!validation.isValid) {
+                updateField(label, { isError: true, errorMsg: validation.errorMsg });
+                hasError = true;
+            }
+        }
+
+        if (hasError) return;
+
+        for (const [key, value] of Object.entries(values)) {
             input[key] = value.value;
         }
 
         setFormState("submitting");
         await onItemAdd(input);
         setFormState("idle");
+
+        // Clear form after successful submission
+        setValues(prev => Object.fromEntries(
+            Object.entries(prev).map(([key]) => [key, { value: "", isError: false, errorMsg: "Cannot be empty" }])
+        ));
     }
 
     return (
@@ -71,7 +159,7 @@ export default function AddItemForm({ title, labels, onItemAdd, ...other }: AddI
                 <TextField
                     key={label}
                     label={label}
-                    errorMsg="Cannot be empty."
+                    errorMsg={values[label].errorMsg}
                     isError={values[label].isError}
                     value={values[label].value}
                     onChange={(e) => {handleOnChange(label, e.target.value)}}
