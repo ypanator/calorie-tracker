@@ -13,10 +13,8 @@ export default function useRequestHelper() {
                 response = await WorkWithMinDelay(axiosInstance.post(endpoint, payload));
             } else {
                 response = await WorkWithMinDelay(axiosInstance.get(endpoint, { params: payload }));
-            }
-
-            if (response.status >= 400) {
-                const errorMessage = response.data.msg || response.data || "An error occurred";
+            }            if (response.status >= 400) {
+                const errorMessage = response.data?.message || response.data?.msg || response.data || "An error occurred";
                 errorToast(errorMessage);
                 console.error(errorMessage);
                 
@@ -31,9 +29,16 @@ export default function useRequestHelper() {
             }
 
             successToast(successMsg);
-            return response;
-
-        } catch (err) {
+            // Return unwrapped data from the response
+            return response.data?.data || response.data;        } catch (err: any) {
+            // If it's an axios error with a response, use that error message
+            if (err.response?.data) {
+                const errorMessage = err.response.data.message || err.response.data.msg || "An error occurred";
+                errorToast(errorMessage);
+                console.error(errorMessage);
+                throw new Error(errorMessage);
+            }
+            // Otherwise it's a network/connection error
             const errorMessage = "Could not connect to server. Please try again later.";
             errorToast(errorMessage);
             console.error(err);

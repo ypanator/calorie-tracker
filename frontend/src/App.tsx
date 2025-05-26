@@ -2,6 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from './components/Navbar';
 import NavbarLink from "./components/NavbarLink.tsx";
 import { Box, HStack } from "@chakra-ui/react";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuth } from "./hooks/useAuth";
 
 import HomePage from './pages/HomePage';
 import ExercisePage from './pages/ExercisePage';
@@ -18,23 +20,42 @@ import { FaLock } from "react-icons/fa";
 
 
 export default function App() {
+    const { isAuthenticated, logout } = useAuth();
+    
     return (
     <HStack spacing={0} minHeight="100vh" minWidth="100vw" align="stretch" justify="flex-start">
         <Navbar>
-            <NavbarLink Icon={FaHome}      to="/"          text="Home" />
-            <NavbarLink Icon={CgGym}      to="/exercise"  text="Exercises" />
-            <NavbarLink Icon={MdFastfood} to="/food"      text="Foods" />
-            <NavbarLink Icon={FaUser}     to="/user"      text="Profile" />
-            <NavbarLink Icon={FaLock}     to="/auth"      text="Log in" />
+            <NavbarLink Icon={FaHome} to="/" text="Home" />
+            {isAuthenticated ? (
+                <>
+                    <NavbarLink Icon={CgGym} to="/exercise" text="Exercises" />
+                    <NavbarLink Icon={MdFastfood} to="/food" text="Foods" />
+                    <NavbarLink Icon={FaUser} to="/user" text="Profile" />
+                    <NavbarLink Icon={FaLock} to="/auth" text="Log out" onClick={logout} />
+                </>
+            ) : (
+                <NavbarLink Icon={FaLock} to="/auth" text="Log in" />
+            )}
         </Navbar>
-        <Box as="main" flex="1" minHeight="100vh">
-        <Routes>
-            <Route path="/"          element={<HomePage />} />
-            <Route path="/exercise"  element={<ExercisePage />} />
-            <Route path="/food"      element={<FoodPage />} />
-            <Route path="/user"      element={<UserPage />} />
-            <Route path="/auth"      element={<AuthPage />} />
-            <Route path="*"          element={<NotFoundPage />} />
+        <Box as="main" flex="1" minHeight="100vh">        <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/exercise" element={
+                <ProtectedRoute>
+                    <ExercisePage />
+                </ProtectedRoute>
+            } />
+            <Route path="/food" element={
+                <ProtectedRoute>
+                    <FoodPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/user" element={
+                <ProtectedRoute>
+                    <UserPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Box>
     </HStack>

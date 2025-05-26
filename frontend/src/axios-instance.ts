@@ -6,8 +6,7 @@ const axiosInstance = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true,
-    validateStatus: status => status < 600
+    withCredentials: true
 });
 
 // Add response interceptor for token handling

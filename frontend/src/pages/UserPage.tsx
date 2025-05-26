@@ -25,13 +25,11 @@ import { type UserProfile } from "../types/user-type";
 
 export default function UserPage() {    const [profile, setProfile] = useState<UserProfile | null>(null);
     const apiCall = useRequestHelper();
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
-    const loadProfile = async () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();    const loadProfile = async () => {
         const endpoint = "/user/profile";
         try {
             const response = await apiCall("get", endpoint, {}, "Profile loaded successfully!");
-            setProfile(response.data.data.user);
+            setProfile(response.user);
         } catch (err) {
             console.error(err);
         }

@@ -3,10 +3,13 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import ApiError from "../error/api-error.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is required');
-}
+const getJWTSecret = () => {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error('JWT_SECRET environment variable is required');
+    }
+    return secret;
+};
 
 declare global {
     namespace Express {
@@ -24,7 +27,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
 
     const token = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+        const decoded = jwt.verify(token, getJWTSecret()) as { userId: number };
         req.userId = decoded.userId;
         next();
     } catch (err) {

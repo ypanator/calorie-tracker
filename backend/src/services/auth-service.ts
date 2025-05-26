@@ -6,13 +6,6 @@ import { SequelizeData } from "../db/db.js";
 import { AuthModel } from "../types/auth-type.js";
 import UserService from "./user-service.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is required');
-}
-// Once we've checked JWT_SECRET exists, we can safely assert its type
-const SECRET_KEY: jwt.Secret = JWT_SECRET;
-
 /**
  * Service class handling user authentication and registration
  */
@@ -22,9 +15,12 @@ export default class AuthService {
         private sequelizeData: SequelizeData, 
         private userService: UserService
     ) {}
-    
-    private generateToken(userId: number): string {
-        return jwt.sign({ userId }, SECRET_KEY, { expiresIn: '24h' });
+      private generateToken(userId: number): string {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            throw new Error('JWT_SECRET environment variable is required');
+        }
+        return jwt.sign({ userId }, secret, { expiresIn: '24h' });
     }
 
     /**

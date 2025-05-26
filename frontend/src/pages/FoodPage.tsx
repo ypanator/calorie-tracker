@@ -1,5 +1,5 @@
 import { Button, HStack, VStack, Center } from "@chakra-ui/react";
-import AddItemForm from "../components/AddItemForm.tsx";
+import AddItemForm from "../components/AddItemForm";
 import TextField from "../components/TextField.tsx";
 import { useState } from "react";
 import { useToastHelper } from "../hooks/useToastHelper.tsx";
@@ -87,7 +87,7 @@ export default function FoodPage() {
 
         try {
             const data = await apiCall("get", endpoint, payload, "Search completed successfully!");
-            setSearchResult(data.data.data.foods || []);
+            setSearchResult(data.foods || []);
         } catch (err) {
             console.error(err);
             setSearchResult([]);

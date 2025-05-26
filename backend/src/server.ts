@@ -46,8 +46,6 @@ export default class Server {
         origin: "http://localhost:5173",
         credentials: true
       }));
-
-      dotenv.config({ path: "./keys.env" });
       
       this.app.use(helmet());
       this.app.use(express.json());

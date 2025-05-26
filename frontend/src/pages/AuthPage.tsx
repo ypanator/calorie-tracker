@@ -48,17 +48,18 @@ export default function AuthPage() {
 
         setFormState(type);
         const endpoint = type === "login" ? "/auth/login" : "/auth/register";
-        
-        try {
+          try {
             const result = await apiCall("post", endpoint, {
                 username,
                 password
             }, type === "login" ? "Login successful" : "Registration successful");
             
-            if (result.data) {
-                login(result.data);
+            if (result?.token) {
+                login(result.token);
                 // Navigate to homepage after successful auth
                 window.location.href = "/";
+            } else {
+                throw new Error("No token received from server");
             }
         } catch (error) {
             console.error("Auth failed:", error);

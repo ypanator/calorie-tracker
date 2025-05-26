@@ -67,27 +67,24 @@ export default function ExercisePage() {
             time: exercise.duration_minutes,
             calories: exercise.total_calories
         });
-    }
+    }    
 
     const handleExerciseSearch = async (query: string) => {
         if (query.trim().length === 0) {
             errorToast("Search query cannot be empty.");
             return;
-        }
-
+        }        
         const endpoint = "/exercise/find";
         const payload = { name: query, duration: 30 };
-
-        try {
-            const data = await apiCall("get", endpoint, payload, "Search completed successfully!");
-            console.log(data.data.data.exercises);
-            console.log(searchResult)
-            setSearchResult(data.data.data.exercises || []);
+          try {
+            const response = await apiCall("get", endpoint, payload, "Search completed successfully!");
+            console.log('Response:', response.exercises); // Debug log to see the full response structure
+            // Access the exercises array directly since apiCall already unwraps the response data
+            setSearchResult(response.exercises || []);
         } catch (err) {
             console.error(err);
             setSearchResult([]);
         }
-
     }
     
     return (
