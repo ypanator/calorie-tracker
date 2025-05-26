@@ -3,7 +3,10 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import ApiError from "../error/api-error.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-for-mvp';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required');
+}
 
 declare global {
     namespace Express {

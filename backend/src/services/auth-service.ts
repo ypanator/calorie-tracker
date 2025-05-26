@@ -6,7 +6,10 @@ import { SequelizeData } from "../db/db.js";
 import { AuthModel } from "../types/auth-type.js";
 import UserService from "./user-service.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-for-mvp';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required');
+}
 
 /**
  * Service class handling user authentication and registration
