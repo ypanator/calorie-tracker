@@ -7,7 +7,7 @@ import ExerciseService from "../services/exercise-service.js";
 import exerciseSchema from "../schemas/exercise-schema.js";
 import ApiError from "../error/api-error.js";
 import { ExerciseApi } from "../types/exercise-type.js";
-import { requireAuth } from "../middleware/auth-middleware.js";
+import { requireAuth } from "../middleware/jwt-middleware.js";
 import sendResponse from "../send-response.js";
 
 /** Exercise management controller */
@@ -22,6 +22,7 @@ export default class ExerciseController {
          *   get:
          *     summary: Find exercises by name and duration
          *     tags: [Exercises]
+         *     security: [{ bearerAuth: [] }]
          *     parameters:
          *       - in: query
          *         name: name
@@ -60,7 +61,7 @@ export default class ExerciseController {
                     throw new ApiError("Duration must be greater than 0.", 400);
                 }
 
-                const exercises: ExerciseApi = await exerciseService.find(req.session.userId || null, query, durationInt);
+                const exercises: ExerciseApi = await exerciseService.find(req.userId || null, query, durationInt);
                 sendResponse(res, 200, "success", "Retrieved exercises.", { exercises });
         
             } catch (e) { next(e); }
@@ -71,7 +72,7 @@ export default class ExerciseController {
          *   post:
          *     summary: Add new exercise
          *     tags: [Exercises]
-         *     security: [{ sessionAuth: [] }]
+         *     security: [{ bearerAuth: [] }]
          *     requestBody:
          *       required: true
          *       content:
@@ -84,7 +85,7 @@ export default class ExerciseController {
          */
         this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
-                await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.session.userId! });
+                await exerciseService.add({ ...exerciseSchema.parse(req.body), userId: req.userId! });
                 sendResponse(res, 201, "success", "Exercise added.");
         
             } catch (e) { next(e); }

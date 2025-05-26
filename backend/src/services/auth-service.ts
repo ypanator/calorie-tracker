@@ -1,27 +1,35 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import AuthProvider from "../providers/auth-provider.js";
 import ApiError from "../error/api-error.js";
 import { SequelizeData } from "../db/db.js";
 import { AuthModel } from "../types/auth-type.js";
 import UserService from "./user-service.js";
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-for-mvp';
+
 /**
  * Service class handling user authentication and registration
  */
 export default class AuthService {
-    
     constructor(
-        private authProvider: AuthProvider, private sequelizeData: SequelizeData, private userService: UserService
+        private authProvider: AuthProvider, 
+        private sequelizeData: SequelizeData, 
+        private userService: UserService
     ) {}
     
+    private generateToken(userId: number): string {
+        return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' });
+    }
+
     /**
      * Authenticates a user with username and password
      * @param username The username to authenticate
      * @param password The password to verify
-     * @returns Promise resolving to the user ID if authentication is successful
+     * @returns Promise resolving to the JWT token if authentication is successful
      * @throws {ApiError} If credentials are incorrect or user doesn't exist
      */
-    async login(username: string, password: string): Promise<number> {
+    async login(username: string, password: string): Promise<string> {
         const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
         if (!credentials) { 
             throw new ApiError("Incorrect credentials.", 401);
@@ -32,16 +40,17 @@ export default class AuthService {
             throw new ApiError("Incorrect credentials.", 401);
         }
         
-        return userId!;
-    };  
+        return this.generateToken(userId!);
+    }
 
     /**
      * Registers a new user with username and password
      * @param username The username for the new account
      * @param password The password for the new account
+     * @returns Promise resolving to the JWT token
      * @throws {ApiError} If username is taken or registration fails
      */
-    async register(username: string, password: string): Promise<void> {
+    async register(username: string, password: string): Promise<string> {
         const credentials: AuthModel | null = await this.authProvider.findCredentialsByUsername(username);
         if (credentials) {
             throw new ApiError("Username already taken.", 400);
@@ -55,6 +64,7 @@ export default class AuthService {
             await this.authProvider.create({ username, password: hashedPassword, userId: user.id }, transaction);
     
             await transaction.commit();
+            return this.generateToken(user.id!);
         } catch (e) {
             await transaction.rollback();
             console.log(`Auth transaction failed ${(e as Error).stack}`)

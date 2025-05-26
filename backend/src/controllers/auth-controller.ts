@@ -5,7 +5,7 @@
 import express, { Router } from "express";
 import authSchema from "../schemas/auth-schema.js";
 import AuthService from "../services/auth-service.js";
-import { authLimiter, requireAuth } from "../middleware/auth-middleware.js";
+import { authLimiter, requireAuth } from "../middleware/jwt-middleware.js";
 import sendResponse from "../send-response.js";
 
 /** Authentication controller */
@@ -37,30 +37,8 @@ export default class AuthController {
         this.router.post("/login", authLimiter, async (req, res, next) => {
             try {
                 const { username, password } = authSchema.parse(req.body);
-                const userId: number = await authService.login(username, password);
-
-                req.session.userId = userId;
-                sendResponse(res, 200, "success", "Successfuly logged in.");
-
-            } catch (e) { next(e); }
-        });
-
-        /** @swagger
-         * /auth/logout:
-         *   post:
-         *     summary: Log out
-         *     tags: [Auth]
-         *     security: [{ sessionAuth: [] }]
-         *     responses:
-         *       200: { description: Logged out }
-         *       401: { description: Unauthorized }
-         */
-        this.router.post("/logout", requireAuth, (req, res, next) => {
-            try {
-                req.session.destroy(err => { if (err) return next(err); });
-                res.clearCookie("connect.sid");
-                sendResponse(res, 200, "success", "Logged out successfully.")
-
+                const token = await authService.login(username, password);
+                sendResponse(res, 200, "success", "Successfully logged in.", { token });
             } catch (e) { next(e); }
         });
 
@@ -86,9 +64,8 @@ export default class AuthController {
         this.router.post("/register", authLimiter, async (req, res, next) => {
             try {
                 const { username, password } = authSchema.parse(req.body);
-                await authService.register(username, password);
-                sendResponse(res, 200, "success", "Successfuly registered.");
-
+                const token = await authService.register(username, password);
+                sendResponse(res, 200, "success", "Successfully registered.", { token });
             } catch (e) { next(e); }
         });
     }

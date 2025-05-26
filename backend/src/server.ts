@@ -1,5 +1,4 @@
 import express from "express";
-import session from "express-session";
 import { Express } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
@@ -49,27 +48,12 @@ export default class Server {
       }));
 
       dotenv.config({ path: "./keys.env" });
-    
-      const session_key: string = process.env.session_key || "";
-      if (!session_key) {
-        throw new Error("Missing session_key in environment variables.");
-      }
-    
+      
       this.app.use(helmet());
       this.app.use(express.json());
 
       // Add Swagger UI
       this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-      this.app.use(session({
-        secret: session_key,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: false,
-          maxAge: 1000 * 60 * 60 * 24
-        }
-      }));
       
       this.sequelizeData = dependencies && dependencies.sequelizeData ? dependencies.sequelizeData : new SequelizeData();
       

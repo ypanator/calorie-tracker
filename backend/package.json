@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "axios": "^1.8.4",
@@ -25,6 +26,7 @@
     "express-session": "^1.18.1",
     "express-session-sqlite": "^2.1.1",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",

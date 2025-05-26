@@ -5,7 +5,7 @@
  */
 import express, { Router } from "express";
 import FoodService from "../services/food-service.js";
-import { requireAuth } from "../middleware/auth-middleware.js";
+import { requireAuth } from "../middleware/jwt-middleware.js";
 import ApiError from "../error/api-error.js";
 import foodSchema from "../schemas/food-schema.js";
 import sendResponse from "../send-response.js";
@@ -22,7 +22,7 @@ export default class FoodController {
          *   get:
          *     summary: Find foods by name and amount
          *     tags: [Foods]
-         *     security: [{ sessionAuth: [] }]
+         *     security: [{ bearerAuth: [] }]
          *     parameters:
          *       - in: query
          *         name: name
@@ -73,7 +73,7 @@ export default class FoodController {
          *   post:
          *     summary: Add new food
          *     tags: [Foods]
-         *     security: [{ sessionAuth: [] }]
+         *     security: [{ bearerAuth: [] }]
          *     requestBody:
          *       required: true
          *       content:
@@ -86,7 +86,7 @@ export default class FoodController {
          */
         this.router.post("/add", requireAuth, async (req, res, next) => {
             try {
-                await foodService.add({ ...foodSchema.parse(req.body), userId: req.session.userId! });
+                await foodService.add({ ...foodSchema.parse(req.body), userId: req.userId! });
                 sendResponse(res, 200, "success", "Food item successfuly added.");
 
             } catch (e) { next(e); }

@@ -58,10 +58,10 @@ const swaggerDefinition = {
       }
     },
     securitySchemes: {
-      sessionAuth: {
-        type: 'apiKey',
-        in: 'cookie',
-        name: 'connect.sid'
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
       }
     }
   }
