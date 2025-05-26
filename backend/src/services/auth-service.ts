@@ -10,6 +10,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
     throw new Error('JWT_SECRET environment variable is required');
 }
+// Once we've checked JWT_SECRET exists, we can safely assert its type
+const SECRET_KEY: jwt.Secret = JWT_SECRET;
 
 /**
  * Service class handling user authentication and registration
@@ -22,7 +24,7 @@ export default class AuthService {
     ) {}
     
     private generateToken(userId: number): string {
-        return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' });
+        return jwt.sign({ userId }, SECRET_KEY, { expiresIn: '24h' });
     }
 
     /**
